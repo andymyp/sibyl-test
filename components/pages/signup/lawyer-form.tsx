@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useSignUp } from "@/hooks/auth/use-signup";
 
 type FormValues = z.infer<typeof SignUpSchema>;
 
@@ -31,8 +32,10 @@ export function SignUpLawyerForm() {
     },
   });
 
+  const { isLoading, signUp } = useSignUp("LAWYER");
+
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    console.log(data);
+    await signUp(data);
   };
 
   return (

@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useSignIn } from "@/hooks/auth/use-signin";
 
 type FormValues = z.infer<typeof SignInSchema>;
 
@@ -24,8 +25,10 @@ export function SignInForm() {
     defaultValues: { email: "", password: "" },
   });
 
+  const { isLoading, signIn } = useSignIn();
+
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    console.log(data);
+    await signIn(data);
   };
 
   return (
@@ -43,7 +46,7 @@ export function SignInForm() {
                 <Input
                   placeholder="Email"
                   rightIcon={Mail}
-                  disabled={form.formState.isSubmitting}
+                  disabled={form.formState.isSubmitting || isLoading}
                   {...field}
                 />
               </FormControl>
@@ -60,7 +63,7 @@ export function SignInForm() {
                 <Input
                   placeholder="Password"
                   type="password"
-                  disabled={form.formState.isSubmitting}
+                  disabled={form.formState.isSubmitting || isLoading}
                   {...field}
                   toggleablePassword
                 />
@@ -71,10 +74,10 @@ export function SignInForm() {
         />
         <Button
           type="submit"
-          disabled={form.formState.isSubmitting}
+          disabled={form.formState.isSubmitting || isLoading}
           className="w-full mt-4"
         >
-          {form.formState.isSubmitting && (
+          {(form.formState.isSubmitting || isLoading) && (
             <Loader2 className="animate-spin text-white" />
           )}
           Sign In

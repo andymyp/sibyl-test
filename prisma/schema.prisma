@@ -17,14 +17,13 @@ datasource db {
 
 model User {
   id           String   @id @default(uuid())
+  name         String
   email        String   @unique
-  password     String
   role         Role
-  name         String?
   jurisdiction String?
   barNumber    String?
   createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  updatedAt    DateTime @default(now()) @updatedAt
 
   cases  LegalCase[] @relation("client_cases")
   quotes Quote[]     @relation("lawyer_quotes")
@@ -43,7 +42,7 @@ model LegalCase {
   quotes         Quote[]
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model CaseFile {
@@ -69,7 +68,7 @@ model Quote {
   status       QuoteStatus @default(PROPOSED)
   Payment      Payment[]
   createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  updatedAt    DateTime    @default(now()) @updatedAt
 
   @@unique([caseId, lawyerId], name: "case_lawyer_unique")
   @@index([caseId])
@@ -84,7 +83,7 @@ model Payment {
   amountCents    Int
   status         PaymentStatus
   createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  updatedAt      DateTime      @default(now()) @updatedAt
 }
 
 enum Role {

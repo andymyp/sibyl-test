@@ -1,7 +1,6 @@
 "use client";
 
 import { z } from "zod";
-import Link from "next/link";
 import { Loader2, Mail, User } from "lucide-react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,6 +14,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useSignUp } from "@/hooks/auth/use-signup";
 
 type FormValues = z.infer<typeof SignUpSchema>;
 
@@ -29,8 +29,10 @@ export function SignUpClientForm() {
     },
   });
 
+  const { isLoading, signUp } = useSignUp("CLIENT");
+
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    console.log(data);
+    await signUp(data);
   };
 
   return (
@@ -48,7 +50,7 @@ export function SignUpClientForm() {
                 <Input
                   placeholder="Name"
                   rightIcon={User}
-                  disabled={form.formState.isSubmitting}
+                  disabled={form.formState.isSubmitting || isLoading}
                   {...field}
                 />
               </FormControl>
@@ -65,7 +67,7 @@ export function SignUpClientForm() {
                 <Input
                   placeholder="Email"
                   rightIcon={Mail}
-                  disabled={form.formState.isSubmitting}
+                  disabled={form.formState.isSubmitting || isLoading}
                   {...field}
                 />
               </FormControl>
@@ -82,7 +84,7 @@ export function SignUpClientForm() {
                 <Input
                   placeholder="Password"
                   type="password"
-                  disabled={form.formState.isSubmitting}
+                  disabled={form.formState.isSubmitting || isLoading}
                   {...field}
                   toggleablePassword
                 />
@@ -100,7 +102,7 @@ export function SignUpClientForm() {
                 <Input
                   placeholder="Confirm Password"
                   type="password"
-                  disabled={form.formState.isSubmitting}
+                  disabled={form.formState.isSubmitting || isLoading}
                   {...field}
                   toggleablePassword
                 />
@@ -111,10 +113,10 @@ export function SignUpClientForm() {
         />
         <Button
           type="submit"
-          disabled={form.formState.isSubmitting}
+          disabled={form.formState.isSubmitting || isLoading}
           className="w-full mt-4"
         >
-          {form.formState.isSubmitting && (
+          {(form.formState.isSubmitting || isLoading) && (
             <Loader2 className="animate-spin text-white" />
           )}
           Sign Up
