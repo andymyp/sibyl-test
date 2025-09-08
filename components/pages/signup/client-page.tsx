@@ -1,14 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
-import { SignInForm } from "./form";
+import { SignUpClientForm } from "./client-form";
 
-export function SignInPage() {
+export function SignUpClientPage() {
   return (
     <div className="min-h-screen w-full sm:max-w-md flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
           <Image
-            src="./logo.svg"
+            src="/logo.svg"
             alt="LegalMarketplace"
             width={48}
             height={48}
@@ -16,22 +16,28 @@ export function SignInPage() {
           />
         </div>
         <h2 className="mt-4 text-center text-xl font-bold">
-          Sign in to your account
+          Create client account
         </h2>
         <p className="mt-2 text-center text-sm">
-          Or{" "}
-          <Link
-            href="/signup/client"
-            className="font-medium underline text-primary"
-          >
-            create a new account
+          Already have an account?{" "}
+          <Link href="/login" className="font-medium underline text-primary">
+            Sign In
           </Link>
         </p>
       </div>
 
       <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <SignInForm />
+          <SignUpClientForm />
+        </div>
+        <div className="mt-6 text-center text-sm">
+          Are you a lawyer?{" "}
+          <Link
+            href="/signup/lawyer"
+            className="font-medium underline text-primary"
+          >
+            Sign Up here
+          </Link>
         </div>
       </div>
     </div>
