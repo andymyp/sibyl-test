@@ -1,4 +1,4 @@
-import { DashboardPage } from "@/components/pages/dashboard/page";
+import { NewCasePage } from "@/components/pages/new-case/page";
 import { createClient } from "@/lib/supabase/server";
 import { redirect, RedirectType } from "next/navigation";
 
@@ -13,5 +13,5 @@ export default async function Page() {
     return redirect("/login", RedirectType.replace);
   }
 
-  return <DashboardPage user={user} />;
+  return <NewCasePage user={user} />;
 }

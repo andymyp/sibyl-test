@@ -1,6 +1,6 @@
 "use client";
 
-import { Folder, LayoutDashboardIcon } from "lucide-react";
+import { Folder, LayoutDashboardIcon, Plus } from "lucide-react";
 import { Button } from "./button";
 import {
   Tooltip,
@@ -23,9 +23,9 @@ const clientMenu = [
     link: "/client/dashboard",
   },
   {
-    name: "Cases",
-    icon: Folder,
-    link: "/client/cases",
+    name: "New Case",
+    icon: Plus,
+    link: "/client/cases/new",
   },
 ] as const;
 

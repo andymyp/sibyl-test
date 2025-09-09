@@ -15,6 +15,7 @@ import { useRouter } from "@bprogress/next";
 import { useDispatch } from "react-redux";
 import { AppDispatch, persistor } from "@/lib/store";
 import { User } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/client";
 
 interface Props {
   user: User;
@@ -22,9 +23,12 @@ interface Props {
 
 export function ProfileMenu({ user }: Props) {
   const router = useRouter();
+  const supabase = createClient();
   const dispatch = useDispatch<AppDispatch>();
 
   const handleLogout = async () => {
+    await supabase.auth.signOut();
+
     dispatch({ type: "RESET" });
     await persistor.purge();
 

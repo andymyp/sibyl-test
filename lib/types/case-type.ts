@@ -8,7 +8,21 @@ export interface ICasesParams {
   limit: number;
 }
 
+export interface IMyCasesParams {
+  search: string | null;
+  page: number;
+  limit: number;
+}
+
 export interface ILegalCaseWithRelations extends LegalCase {
-  quotes: (Quote & { lawyer: User })[];
+  quotes: Quote[];
   files: CaseFile[];
+}
+
+export interface ICreateCase {
+  clientId: string;
+  title: string;
+  category: string;
+  description: string;
+  files: File[];
 }
