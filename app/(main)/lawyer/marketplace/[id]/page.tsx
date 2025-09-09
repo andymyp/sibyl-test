@@ -1,4 +1,4 @@
-import { MyCasePage } from "@/components/pages/my-case/page";
+import CaseQuotePage from "@/components/pages/marketplace/details/page";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -7,5 +7,5 @@ interface Props {
 export default async function Page({ params }: Props) {
   const { id } = await params;
 
-  return <MyCasePage id={id} />;
+  return <CaseQuotePage id={id} />;
 }

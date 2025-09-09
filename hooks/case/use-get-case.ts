@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 
-export const useGetMyCase = (id: string) => {
+export const useGetCase = (id: string) => {
   const supabase = createClient();
 
   const action = useQuery({
@@ -21,6 +21,7 @@ export const useGetMyCase = (id: string) => {
   `
         )
         .eq("id", id)
+        .eq("status", "OPEN")
         .single();
 
       if (error) throw error;

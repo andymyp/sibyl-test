@@ -1,22 +1,18 @@
-import { PaymentStatus, QuoteStatus } from "../generated/prisma";
+import { QuoteStatus } from "../generated/prisma";
 
-export interface IQuote {
-  id: string;
+export interface ICreateQuote {
   caseId: string;
   lawyerId: string;
-  engagedQuoteId: string;
   amountCents: number;
   expectedDays: number;
   note: string;
-  status: QuoteStatus;
-  createdAt: string;
 }
 
-export interface IPayment {
+export interface IUpdateQuote {
   id: string;
-  quoteId: string;
-  stripeIntentId: string;
+  caseId: string;
+  lawyerId: string;
   amountCents: number;
-  status: PaymentStatus;
-  createdAt: string;
+  expectedDays: number;
+  note: string;
 }

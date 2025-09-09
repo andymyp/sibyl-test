@@ -27,6 +27,7 @@ export const useGetCases = (params: ICasesParams) => {
           `,
           { count: "exact" }
         )
+        .eq("status", "OPEN")
         .order("createdAt", { ascending: false });
 
       if (search) {
