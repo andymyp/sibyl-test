@@ -40,7 +40,7 @@ type FormValues = z.infer<typeof CaseSchema>;
 export function CaseForm({ user }: Props) {
   const form = useForm<FormValues>({
     resolver: zodResolver(CaseSchema),
-    defaultValues: { title: "", category: "all", description: "", files: [] },
+    defaultValues: { title: "", category: "", description: "", files: [] },
   });
 
   const files = form.watch("files");
@@ -123,26 +123,25 @@ export function CaseForm({ user }: Props) {
               <FormLabel>
                 Category <span className="text-destructive">*</span>
               </FormLabel>
-              <FormControl>
-                <Select
-                  value={field.value}
-                  onValueChange={(value) => {
-                    field.onChange(value);
-                  }}
-                >
+              <Select
+                value={field.value}
+                onValueChange={(value) => {
+                  field.onChange(value);
+                }}
+              >
+                <FormControl>
                   <SelectTrigger className="w-full">
-                    <SelectValue />
+                    <SelectValue placeholder="Select category" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All categories</SelectItem>
-                    {categories.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
+                </FormControl>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}

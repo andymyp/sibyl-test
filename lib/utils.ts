@@ -1,5 +1,10 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { createClient } from "@/lib/supabase/client";
+import { store } from "./store";
+import { AppAction } from "./store/slices/app-slice";
+
+const supabase = createClient();
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -12,4 +17,30 @@ export function anonymizeText(text: string) {
       "[EMAIL REDACTED]"
     )
     .replace(/\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/g, "[PHONE REDACTED]");
+}
+
+export async function getSignedUrl(storageKey: string) {
+  const { data, error } = await supabase.storage
+    .from("case-files")
+    .createSignedUrl(storageKey, 60 * 5, { download: true });
+
+  if (error) throw error;
+  return data.signedUrl;
+}
+
+export async function downloadFile(storageKey: string, filename: string) {
+  store.dispatch(AppAction.setLoading(true));
+
+  try {
+    const signedUrl = await getSignedUrl(storageKey);
+
+    const a = document.createElement("a");
+    a.href = signedUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  } finally {
+    store.dispatch(AppAction.setLoading(false));
+  }
 }

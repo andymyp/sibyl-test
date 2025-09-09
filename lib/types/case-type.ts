@@ -26,3 +26,7 @@ export interface ICreateCase {
   description: string;
   files: File[];
 }
+
+export interface IQuoteWithLawyer extends Quote {
+  lawyer: User;
+}

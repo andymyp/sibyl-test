@@ -7,6 +7,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 interface Props {
   user: User;
@@ -15,19 +17,28 @@ interface Props {
 export function NewCasePage({ user }: Props) {
   return (
     <div className="flex w-full justify-center">
-      <Card className="w-full max-w-2xl">
-        <CardHeader>
-          <CardTitle className="text-xl">Create New Case</CardTitle>
-          <CardDescription>
-            Describe your legal matter and upload relevant documents to receive
-            quotes from qualified lawyers
-          </CardDescription>
-        </CardHeader>
+      <div className="flex flex-col w-full max-w-2xl gap-4">
+        <Link
+          href="/client/dashboard"
+          className="inline-flex items-center text-primary hover:text-primary/80"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Dashboard
+        </Link>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl">Create New Case</CardTitle>
+            <CardDescription>
+              Describe your legal matter and upload relevant documents to
+              receive quotes from qualified lawyers
+            </CardDescription>
+          </CardHeader>
 
-        <CardContent>
-          <CaseForm user={user} />
-        </CardContent>
-      </Card>
+          <CardContent>
+            <CaseForm user={user} />
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
