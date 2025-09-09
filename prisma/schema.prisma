@@ -62,7 +62,7 @@ model Quote {
   legalCase    LegalCase   @relation(fields: [caseId], references: [id])
   lawyerId     String
   lawyer       User        @relation(fields: [lawyerId], references: [id], name: "lawyer_quotes")
-  amountCents  Int
+  amount       Int
   expectedDays Int
   note         String?
   status       QuoteStatus @default(PROPOSED)
@@ -80,7 +80,7 @@ model Payment {
   quoteId        String
   quote          Quote         @relation(fields: [quoteId], references: [id])
   stripeIntentId String
-  amountCents    Int
+  amount         Int
   status         PaymentStatus
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @default(now()) @updatedAt

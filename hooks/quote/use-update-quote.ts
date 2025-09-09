@@ -5,11 +5,13 @@ import { useDispatch } from "react-redux";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { IUpdateQuote } from "@/lib/types/quote-type";
+import { useRouter } from "@bprogress/next";
 
 export const useUpdateQuote = () => {
   const supabase = createClient();
   const dispatch = useDispatch<AppDispatch>();
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const action = useMutation<{ id: string }, Error, IUpdateQuote>({
     mutationFn: async ({ id, ...payload }) => {
@@ -31,6 +33,8 @@ export const useUpdateQuote = () => {
       await queryClient.invalidateQueries({
         queryKey: ["case"],
       });
+
+      router.push("/lawyer/my-quotes");
     },
     onError: (err) => toast.error(err.message),
     onSettled: () => dispatch(AppAction.setLoading(false)),

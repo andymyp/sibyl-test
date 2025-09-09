@@ -8,11 +8,11 @@ export const useGetCases = (params: ICasesParams) => {
   const action = useQuery({
     queryKey: [
       "cases",
-      params?.search,
-      params?.category,
-      params?.created_since,
-      params?.page,
-      params?.limit,
+      params.search,
+      params.category,
+      params.created_since,
+      params.page,
+      params.limit,
     ],
     queryFn: async () => {
       const { search, category, created_since, page, limit } = params;

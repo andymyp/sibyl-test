@@ -6,7 +6,7 @@ export const useGetMyCases = (userId: string, params: IMyCasesParams) => {
   const supabase = createClient();
 
   const action = useQuery({
-    queryKey: ["mycases", userId, params?.search, params?.page, params?.limit],
+    queryKey: ["mycases", userId, params.search, params.page, params.limit],
     queryFn: async () => {
       const { search, page, limit } = params;
 

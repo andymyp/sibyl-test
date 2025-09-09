@@ -82,14 +82,14 @@ export function MyCasePage({ id }: Props) {
   const acceptedQuote = quotes.find((q) => q.status === "ACCEPTED");
 
   const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "open":
+    switch (status) {
+      case "OPEN":
         return "bg-indigo-100 text-indigo-800";
-      case "engaged":
+      case "ENGAGED":
         return "bg-green-100 text-green-800";
-      case "closed":
+      case "CLOSED":
         return "bg-gray-100 text-gray-800";
-      case "cancelled":
+      case "CANCELLED":
         return "bg-red-100 text-red-800";
       default:
         return "bg-gray-100 text-gray-800";
@@ -242,7 +242,7 @@ export function MyCasePage({ id }: Props) {
                   <div className="space-y-4">
                     {quotes.map((quote) => (
                       <Card key={quote.id} className="border-gray-200">
-                        <CardContent className="p-4">
+                        <CardContent>
                           <div className="flex justify-between items-start mb-3">
                             <div>
                               <h4 className="font-medium text-gray-900">
@@ -264,10 +264,7 @@ export function MyCasePage({ id }: Props) {
                             <div className="flex items-center space-x-2">
                               <DollarSign className="h-4 w-4 text-green-600" />
                               <span className="text-lg font-semibold text-gray-900">
-                                $
-                                {Math.round(
-                                  quote.amountCents / 100
-                                ).toLocaleString()}
+                                {quote.amount.toLocaleString()}
                               </span>
                             </div>
                             <div className="flex items-center space-x-2">
@@ -298,9 +295,7 @@ export function MyCasePage({ id }: Props) {
                                   >
                                     <CreditCard className="h-4 w-4 mr-2" />
                                     Accept & Pay $
-                                    {Math.round(
-                                      quote.amountCents / 100
-                                    ).toLocaleString()}
+                                    {quote.amount.toLocaleString()}
                                   </Button>
                                 </DialogTrigger>
                                 <DialogContent>
@@ -311,11 +306,7 @@ export function MyCasePage({ id }: Props) {
                                     <DialogDescription>
                                       You are about to accept the quote from{" "}
                                       {quote.lawyer?.name ?? "Unknown Lawyer"}{" "}
-                                      and pay $
-                                      {Math.round(
-                                        quote.amountCents / 100
-                                      ).toLocaleString()}
-                                      .
+                                      and pay ${quote.amount.toLocaleString()}.
                                     </DialogDescription>
                                   </DialogHeader>
                                   <DialogFooter>
@@ -358,8 +349,7 @@ export function MyCasePage({ id }: Props) {
             </Card>
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-4">
             <Card className="border-gray-200">
               <CardHeader>
                 <CardTitle className="text-lg">Case Summary</CardTitle>
@@ -419,10 +409,7 @@ export function MyCasePage({ id }: Props) {
                   <div className="flex justify-between">
                     <span className="text-sm text-green-700">Amount</span>
                     <span className="text-sm font-medium text-green-800">
-                      $
-                      {Math.round(
-                        acceptedQuote.amountCents / 100
-                      ).toLocaleString()}
+                      ${Math.round(acceptedQuote.amount / 100).toLocaleString()}
                     </span>
                   </div>
                   <div className="flex justify-between">

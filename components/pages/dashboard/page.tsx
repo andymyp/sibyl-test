@@ -26,6 +26,7 @@ import { useGetMyCases } from "@/hooks/case/use-get-my-cases";
 import { Input } from "@/components/ui/input";
 import { Paginator } from "@/components/ui/paginator";
 import { useUser } from "@/components/providers/user-provider";
+import { useGetStatsCases } from "@/hooks/case/use-get-stats-cases";
 
 export function DashboardPage() {
   const user = useUser();
@@ -43,6 +44,8 @@ export function DashboardPage() {
 
   const searchDebounce = useDebounce(filters.search, 300);
 
+  const stats = useGetStatsCases(user.id);
+
   const { isGettingCases, totalCases, cases } = useGetMyCases(user.id, {
     ...filters,
     search: searchDebounce,
@@ -50,13 +53,13 @@ export function DashboardPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "open":
-        return "bg-blue-100 text-blue-800";
-      case "engaged":
+      case "OPEN":
+        return "bg-indigo-100 text-indigo-800";
+      case "ENGAGED":
         return "bg-green-100 text-green-800";
-      case "closed":
+      case "CLOSED":
         return "bg-gray-100 text-gray-800";
-      case "cancelled":
+      case "CANCELLED":
         return "bg-red-100 text-red-800";
       default:
         return "bg-gray-100 text-gray-800";
@@ -67,15 +70,6 @@ export function DashboardPage() {
     const legalCase = cases.find((c) => c.id === caseId);
     return legalCase?.Quote?.length ?? 0;
   };
-
-  const totals = cases.reduce(
-    (acc, c) => {
-      acc[c.status] = (acc[c.status] || 0) + 1;
-      acc.totalQuotes += c.Quote?.length || 0;
-      return acc;
-    },
-    { OPEN: 0, ENGAGED: 0, CLOSED: 0, CANCELLED: 0, totalQuotes: 0 }
-  );
 
   return (
     <div className="flex flex-col flex-1 w-full gap-4">
@@ -92,7 +86,9 @@ export function DashboardPage() {
                 <FileText className="h-6 w-6 text-blue-600" />
               </div>
               <div className="ml-4">
-                <p className="text-2xl font-bold text-gray-900">{totalCases}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {stats.total}
+                </p>
                 <p className="text-sm text-gray-600">Total Cases</p>
               </div>
             </div>
@@ -106,9 +102,7 @@ export function DashboardPage() {
                 <Clock className="h-6 w-6 text-yellow-600" />
               </div>
               <div className="ml-4">
-                <p className="text-2xl font-bold text-gray-900">
-                  {totals.OPEN}
-                </p>
+                <p className="text-2xl font-bold text-gray-900">{stats.open}</p>
                 <p className="text-sm text-gray-600">Open Cases</p>
               </div>
             </div>
@@ -123,7 +117,7 @@ export function DashboardPage() {
               </div>
               <div className="ml-4">
                 <p className="text-2xl font-bold text-gray-900">
-                  {totals.ENGAGED}
+                  {stats.engaged}
                 </p>
                 <p className="text-sm text-gray-600">Engaged</p>
               </div>
@@ -139,7 +133,7 @@ export function DashboardPage() {
               </div>
               <div className="ml-4">
                 <p className="text-2xl font-bold text-gray-900">
-                  {totals.totalQuotes}
+                  {stats.totalQuotes}
                 </p>
                 <p className="text-sm text-gray-600">Total Quotes</p>
               </div>
@@ -161,6 +155,7 @@ export function DashboardPage() {
                 setFilters({
                   ...filters,
                   search: e.target.value,
+                  page: 1,
                 })
               }
             />
@@ -252,6 +247,7 @@ export function DashboardPage() {
             setFilters({
               ...filters,
               limit,
+              page: 1,
             });
           }}
           page={filters.page}

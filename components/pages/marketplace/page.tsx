@@ -83,6 +83,7 @@ export function MarketplacePage() {
                 setFilters({
                   ...filters,
                   search: e.target.value,
+                  page: 1,
                 })
               }
             />
@@ -93,6 +94,7 @@ export function MarketplacePage() {
                 setFilters({
                   ...filters,
                   category: value,
+                  page: 1,
                 });
               }}
             >
@@ -115,6 +117,7 @@ export function MarketplacePage() {
                 setFilters({
                   ...filters,
                   created_since: value,
+                  page: 1,
                 });
               }}
             />
@@ -203,6 +206,7 @@ export function MarketplacePage() {
           setFilters({
             ...filters,
             limit,
+            page: 1,
           });
         }}
         page={filters.page}

@@ -143,7 +143,7 @@ export default function CaseQuotePage({ id }: Props) {
                   <div className="flex justify-between">
                     <span className="text-sm text-indigo-700">Amount</span>
                     <span className="text-sm font-medium text-indigo-800">
-                      ${existingQuote.amountCents.toLocaleString()}
+                      ${existingQuote.amount.toLocaleString()}
                     </span>
                   </div>
                   <div className="flex justify-between">

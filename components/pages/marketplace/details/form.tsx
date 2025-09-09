@@ -37,7 +37,7 @@ export function QuoteForm({ user, case_, existingQuote }: Props) {
   const form = useForm<FormValues>({
     resolver: zodResolver(QuoteSchema),
     defaultValues: {
-      amountCents: 0,
+      amount: 0,
       expectedDays: 0,
       note: "",
     },
@@ -45,7 +45,7 @@ export function QuoteForm({ user, case_, existingQuote }: Props) {
 
   useEffect(() => {
     form.reset({
-      amountCents: existingQuote?.amountCents || 0,
+      amount: existingQuote?.amount || 0,
       expectedDays: existingQuote?.expectedDays || 0,
       note: existingQuote?.note || "",
     });
@@ -74,7 +74,7 @@ export function QuoteForm({ user, case_, existingQuote }: Props) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="amountCents"
+            name="amount"
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormLabel>

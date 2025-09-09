@@ -7,11 +7,13 @@ import { createClient } from "@/lib/supabase/client";
 import { v4 as uuidv4 } from "uuid";
 import { ICreateQuote } from "@/lib/types/quote-type";
 import { QuoteStatus } from "@/lib/generated/prisma";
+import { useRouter } from "@bprogress/next";
 
 export const useCreateQuote = () => {
   const supabase = createClient();
   const dispatch = useDispatch<AppDispatch>();
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const quoteId = uuidv4();
 
@@ -35,6 +37,8 @@ export const useCreateQuote = () => {
       await queryClient.invalidateQueries({
         queryKey: ["case"],
       });
+
+      router.push("/lawyer/my-quotes");
     },
     onError: (err) => toast.error(err.message),
     onSettled: () => dispatch(AppAction.setLoading(false)),

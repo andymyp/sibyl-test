@@ -6,8 +6,6 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   ChevronsUpDownIcon,
-  ChevronsLeftIcon,
-  ChevronsRightIcon,
   Loader2,
 } from "lucide-react";
 import {
@@ -41,7 +39,7 @@ import {
   SelectValue,
 } from "./select";
 
-interface TableFilters {
+export interface TableFilters {
   page: number;
   limit: number;
   sort_by?: string | null;
@@ -101,7 +99,7 @@ export function DataTable<T>({
     >
       <div
         className={cn(
-          "w-full overflow-x-auto overflow-y-auto rounded-md border",
+          "w-full overflow-x-auto overflow-y-auto rounded-md border bg-background",
           className
         )}
         style={{ maxHeight }}
@@ -244,17 +242,7 @@ export function DataTable<T>({
               <PaginationItem>
                 <Button
                   variant="outline"
-                  className="!size-9"
-                  onClick={() => setFilters({ ...filters, page: 1 })}
-                  disabled={filters.page === 1}
-                >
-                  <ChevronsLeftIcon size={16} />
-                </Button>
-              </PaginationItem>
-              <PaginationItem>
-                <Button
-                  variant="outline"
-                  className="!size-9"
+                  className="!size-10"
                   onClick={() =>
                     setFilters({ ...filters, page: filters.page - 1 })
                   }
@@ -267,7 +255,7 @@ export function DataTable<T>({
               {pages.map((page) => (
                 <PaginationItem key={page}>
                   <Button
-                    className="!size-9"
+                    className="!size-10"
                     variant={filters.page === page ? "outline" : "ghost"}
                     onClick={() => setFilters({ ...filters, page })}
                   >
@@ -279,25 +267,13 @@ export function DataTable<T>({
               <PaginationItem>
                 <Button
                   variant="outline"
-                  className="!size-9"
+                  className="!size-10"
                   onClick={() =>
                     setFilters({ ...filters, page: filters.page + 1 })
                   }
                   disabled={filters.page >= table.getPageCount()}
                 >
                   <ChevronRightIcon size={16} />
-                </Button>
-              </PaginationItem>
-              <PaginationItem>
-                <Button
-                  variant="outline"
-                  className="!size-9"
-                  onClick={() =>
-                    setFilters({ ...filters, page: table.getPageCount() })
-                  }
-                  disabled={filters.page >= table.getPageCount()}
-                >
-                  <ChevronsRightIcon size={16} />
                 </Button>
               </PaginationItem>
             </PaginationContent>
@@ -310,7 +286,7 @@ export function DataTable<T>({
               setFilters({ ...filters, page: 1, limit: Number(value) })
             }
           >
-            <SelectTrigger className="!h-9 w-fit whitespace-nowrap">
+            <SelectTrigger className="!h-10 w-fit whitespace-nowrap">
               <SelectValue placeholder="Select number of results" />
             </SelectTrigger>
             <SelectContent>
