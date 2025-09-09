@@ -15,6 +15,7 @@ import {
 import { ProfileMenu } from "./profile-menu";
 import { User } from "@supabase/supabase-js";
 import { Sidebar } from "./sidebar";
+import { Badge } from "./badge";
 
 interface Props {
   user: User;
@@ -59,7 +60,8 @@ export function MainHeader({ user }: Props) {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary">{user.user_metadata.role}</Badge>
           <ProfileMenu user={user} />
         </div>
       </div>

@@ -7,7 +7,6 @@ import { createClient } from "@/lib/supabase/client";
 import { ISignUp } from "@/lib/types/auth-type";
 import { toast } from "sonner";
 import { User } from "@supabase/supabase-js";
-import { v4 as UUIDV4 } from "uuid";
 import { Role } from "@/lib/generated/prisma";
 
 export function useSignUp(role: Role) {
@@ -18,14 +17,6 @@ export function useSignUp(role: Role) {
   const action = useMutation<User | null, Error, ISignUp>({
     mutationFn: async ({ password, confirm_password, ...payload }) => {
       dispatch(AppAction.setLoading(true));
-
-      const insert = await supabase.from("User").insert({
-        ...payload,
-        id: UUIDV4(),
-        role,
-      });
-
-      if (insert.error) throw insert.error;
 
       const { data, error } = await supabase.auth.signUp({
         email: payload.email,
@@ -40,6 +31,14 @@ export function useSignUp(role: Role) {
       });
 
       if (error) throw error;
+
+      const insert = await supabase.from("User").insert({
+        ...payload,
+        id: data.user?.id,
+        role,
+      });
+
+      if (insert.error) throw insert.error;
 
       return data.user;
     },
