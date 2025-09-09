@@ -1,17 +1,5 @@
 import { DashboardPage } from "@/components/pages/dashboard/page";
-import { createClient } from "@/lib/supabase/server";
-import { redirect, RedirectType } from "next/navigation";
 
-export default async function Page() {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return redirect("/login", RedirectType.replace);
-  }
-
-  return <DashboardPage user={user} />;
+export default function Page() {
+  return <DashboardPage />;
 }

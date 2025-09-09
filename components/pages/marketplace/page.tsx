@@ -23,17 +23,15 @@ import {
   parseAsString,
   useQueryStates,
 } from "nuqs";
-import { User } from "@supabase/supabase-js";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useGetCases } from "@/hooks/case/use-get-cases";
 import { Paginator } from "@/components/ui/paginator";
 import { Quote } from "@/lib/generated/prisma";
+import { useUser } from "@/components/providers/user-provider";
 
-interface Props {
-  user: User;
-}
+export function MarketplacePage() {
+  const user = useUser();
 
-export function MarketplacePage({ user }: Props) {
   const [filters, setFilters] = useQueryStates(
     {
       search: parseAsString.withDefault(""),
@@ -52,13 +50,14 @@ export function MarketplacePage({ user }: Props) {
   const { isGettingCases, totalCases, cases } = useGetCases({
     ...filters,
     search: searchDebounce,
+    category: filters.category === "all" ? null : filters.category,
   });
 
   const hasQuoteForCase = (caseId: string) => {
     return cases.some(
       (c) =>
         c.id === caseId &&
-        c.quotes.some((quote: Quote) => quote.lawyerId === user.id)
+        c.Quote.some((quote: Quote) => quote.lawyerId === user.id)
     );
   };
 
@@ -174,13 +173,13 @@ export function MarketplacePage({ user }: Props) {
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground mb-4 line-clamp-3">
+                <p className="text-muted-foreground mb-4 line-clamp-2">
                   {anonymizeText(case_.description)}
                 </p>
                 <div className="flex justify-between items-center">
                   <div className="flex items-center text-muted-foreground text-xs">
                     <FileText className="h-4 w-4 mr-1" />
-                    {case_.files.length} files
+                    {case_.CaseFile.length} files
                   </div>
                   <Link href={`/lawyer/marketplace/${case_.id}`}>
                     <Button variant="outline">View Details & Quote</Button>

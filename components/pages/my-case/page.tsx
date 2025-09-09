@@ -39,13 +39,15 @@ import { useGetMyCase } from "@/hooks/case/use-get-my-case";
 import { CaseFile } from "@/lib/generated/prisma";
 import { IQuoteWithLawyer } from "@/lib/types/case-type";
 import { downloadFile } from "@/lib/utils";
+import { useUser } from "@/components/providers/user-provider";
 
 interface Props {
   id: string;
-  user: User;
 }
 
-export function MyCasePage({ id, user }: Props) {
+export function MyCasePage({ id }: Props) {
+  const user = useUser();
+
   const [selectedQuote, setSelectedQuote] = useState<string | null>(null);
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);

@@ -34,6 +34,7 @@ export function SignUpClientForm() {
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     await signUp(data);
+    form.reset();
   };
 
   return (

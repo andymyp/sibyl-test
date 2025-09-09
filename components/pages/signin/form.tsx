@@ -29,6 +29,7 @@ export function SignInForm() {
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     await signIn(data);
+    form.reset();
   };
 
   return (

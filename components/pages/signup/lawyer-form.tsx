@@ -37,6 +37,7 @@ export function SignUpLawyerForm() {
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     await signUp(data);
+    form.reset();
   };
 
   return (

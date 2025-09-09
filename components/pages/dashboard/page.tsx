@@ -19,19 +19,17 @@ import {
   Search,
   Loader2,
 } from "lucide-react";
-import { User } from "@supabase/supabase-js";
 import { PageHeader } from "@/components/ui/page-header";
 import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useGetMyCases } from "@/hooks/case/use-get-my-cases";
 import { Input } from "@/components/ui/input";
 import { Paginator } from "@/components/ui/paginator";
+import { useUser } from "@/components/providers/user-provider";
 
-interface Props {
-  user: User;
-}
+export function DashboardPage() {
+  const user = useUser();
 
-export function DashboardPage({ user }: Props) {
   const [filters, setFilters] = useQueryStates(
     {
       search: parseAsString.withDefault(""),

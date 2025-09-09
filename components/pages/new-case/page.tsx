@@ -1,4 +1,5 @@
-import { User } from "@supabase/supabase-js";
+"use client";
+
 import { CaseForm } from "./form";
 import {
   Card,
@@ -9,12 +10,11 @@ import {
 } from "@/components/ui/card";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { useUser } from "@/components/providers/user-provider";
 
-interface Props {
-  user: User;
-}
+export function NewCasePage() {
+  const user = useUser();
 
-export function NewCasePage({ user }: Props) {
   return (
     <div className="flex w-full justify-center">
       <div className="flex flex-col w-full max-w-2xl gap-4">

@@ -5,7 +5,7 @@ interface Props {
 
 export function PageHeader({ title, description }: Props) {
   return (
-    <div className="flex flex-col w-full gap-2">
+    <div className="flex flex-col w-full gap-1">
       <h1 className="text-2xl font-bold">{title}</h1>
       <p className="text-muted-foreground">{description}</p>
     </div>
