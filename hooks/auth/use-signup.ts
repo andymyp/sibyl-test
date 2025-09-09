@@ -8,8 +8,9 @@ import { ISignUp } from "@/lib/types/auth-type";
 import { toast } from "sonner";
 import { User } from "@supabase/supabase-js";
 import { v4 as UUIDV4 } from "uuid";
+import { Role } from "@/lib/generated/prisma";
 
-export function useSignUp(role: "CLIENT" | "LAWYER") {
+export function useSignUp(role: Role) {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const supabase = createClient();

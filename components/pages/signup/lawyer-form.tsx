@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useSignUp } from "@/hooks/auth/use-signup";
+import { Role } from "@/lib/generated/prisma";
 
 type FormValues = z.infer<typeof SignUpSchema>;
 
@@ -32,7 +33,7 @@ export function SignUpLawyerForm() {
     },
   });
 
-  const { isLoading, signUp } = useSignUp("LAWYER");
+  const { isLoading, signUp } = useSignUp(Role.LAWYER);
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     await signUp(data);

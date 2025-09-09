@@ -8,9 +8,9 @@ import { LoadingProvider } from "@/components/providers/loading-provider";
 import { ToastProvider } from "@/components/providers/toast-provider";
 
 export const metadata: Metadata = {
-  title: "LegalMarketplace",
+  title: "LegalConnect",
   description: "Legal Marketplace App",
-  keywords: "Legal, Marketplace, Legal Marketplace",
+  keywords: "Legal, Connect, Marketplace, Legal Connect, Legal Marketplace",
   authors: [
     {
       name: "M. Yudistiandy Prabowo",
