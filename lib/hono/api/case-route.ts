@@ -7,7 +7,7 @@ import { StatusCodes } from "http-status-codes";
 import { CaseSchema } from "@/lib/schemas/case-schema";
 import { prisma } from "@/lib/prisma";
 import { authMiddleware } from "../middleware";
-import { CaseStatus, Role } from "@/lib/generated/prisma";
+import { CaseStatus, QuoteStatus, Role } from "@/lib/generated/prisma";
 
 export const caseRoute = new Hono()
   .post(
@@ -207,6 +207,32 @@ export const caseRoute = new Hono()
         client: true,
         files: true,
         quotes: {
+          include: {
+            lawyer: true,
+          },
+        },
+      },
+    });
+
+    return c.json(legalCase, StatusCodes.OK);
+  })
+  .get("/lawyer/:id", authMiddleware(Role.LAWYER), async (c) => {
+    const userId = c.get("userId");
+    const id = c.req.param("id");
+
+    const legalCase = await prisma.legalCase.findFirst({
+      where: {
+        id,
+        status: CaseStatus.ENGAGED,
+      },
+      include: {
+        client: true,
+        files: true,
+        quotes: {
+          where: {
+            lawyerId: userId,
+            status: QuoteStatus.ACCEPTED,
+          },
           include: {
             lawyer: true,
           },

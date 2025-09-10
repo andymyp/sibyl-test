@@ -43,7 +43,9 @@ const columns: ColumnDef<IQuoteWithCase>[] = [
   {
     accessorKey: "amount",
     header: "Amount",
-    cell: (info) => <div>${info.getValue<number>().toLocaleString()}</div>,
+    cell: (info) => (
+      <div>${(info.getValue<number>() / 100).toLocaleString()}</div>
+    ),
     enableSorting: false,
   },
   {
@@ -106,7 +108,11 @@ export function MyQuotesTable({
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="sm">
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled={row.status === "REJECTED"}
+          >
             <MoreVertical />
           </Button>
         </DropdownMenuTrigger>

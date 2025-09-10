@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { Clock, DollarSign, Loader2 } from "lucide-react";
-import { SubmitErrorHandler, SubmitHandler, useForm } from "react-hook-form";
+import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
@@ -45,8 +45,8 @@ export function QuoteForm({ caseId, existingQuote }: Props) {
     if (existingQuote) {
       form.reset({
         caseId: existingQuote.caseId,
-        amount: existingQuote.amount || 0,
-        expectedDays: existingQuote.expectedDays || 0,
+        amount: existingQuote.amount / 100,
+        expectedDays: existingQuote.expectedDays,
         note: existingQuote.note || "",
       });
     }
@@ -57,23 +57,23 @@ export function QuoteForm({ caseId, existingQuote }: Props) {
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     if (existingQuote) {
-      await updateQuote({ ...existingQuote, ...data });
+      await updateQuote({
+        ...existingQuote,
+        ...data,
+        amount: data.amount * 100,
+      });
     } else {
-      await createQuote(data);
+      await createQuote({ ...data, amount: data.amount * 100 });
     }
 
     form.reset();
-  };
-
-  const onError: SubmitErrorHandler<FormValues> = async (errors) => {
-    console.log("errors:", errors);
   };
 
   return (
     <Form {...form}>
       <form
         className="flex flex-col w-full gap-4"
-        onSubmit={form.handleSubmit(onSubmit, onError)}
+        onSubmit={form.handleSubmit(onSubmit)}
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField

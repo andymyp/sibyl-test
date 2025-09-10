@@ -1,94 +1,85 @@
 import { AppDispatch } from "@/lib/store";
 import { AppAction } from "@/lib/store/slices/app-slice";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";
-import { createClient } from "@/lib/supabase/client";
-import { v4 as uuidv4 } from "uuid";
-import { PaymentStatus } from "@/lib/generated/prisma";
-import { IQuoteWithLawyer } from "@/lib/types/case-type";
 import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
+import { client } from "@/lib/hono/client";
+import { InferRequestType, InferResponseType } from "hono";
+import { PaymentStatus } from "@/lib/generated/prisma";
+
+type ReqType = InferRequestType<(typeof client.pay)[":id"]["$post"]>;
+type ResType = InferResponseType<(typeof client.pay)[":id"]["$patch"]>;
 
 export const useAcceptQuote = () => {
-  const supabase = createClient();
+  const queryClient = useQueryClient();
   const dispatch = useDispatch<AppDispatch>();
   const stripe = useStripe();
   const elements = useElements();
 
-  const paymentId = uuidv4();
-
-  const action = useMutation<{ paymentId: string }, Error, IQuoteWithLawyer>({
-    mutationFn: async (payload) => {
+  const action = useMutation<ResType, Error, ReqType>({
+    mutationFn: async ({ param }) => {
       if (!stripe || !elements) throw new Error("Stripe not loaded");
 
       dispatch(AppAction.setLoading(true));
 
-      const { data: payment, error: paymentError } = await supabase
-        .from("Payment")
-        .insert({
-          id: paymentId,
-          quoteId: payload.id,
-          stripeIntentId: "",
-          amount: payload.amount,
-          status: PaymentStatus.PENDING,
-        })
-        .select()
-        .single();
+      const res = await client.pay[":id"]["$post"]({ param });
+      if (!res.ok) throw new Error(await res.text());
 
-      if (paymentError) throw paymentError;
+      const pi = await res.json();
 
-      const { data: pi, error: piError } = await supabase.functions.invoke(
-        "create-payment-intent",
-        {
-          body: { amount: payment.amount, paymentId: payment.id },
-        }
-      );
+      if (!pi.clientSecret) {
+        throw new Error("clientSecret not found");
+      }
 
-      if (piError) throw piError;
-
-      const result = await stripe.confirmCardPayment(pi.client_secret, {
+      const result = await stripe.confirmCardPayment(pi.clientSecret, {
         payment_method: {
           card: elements.getElement(CardElement)!,
         },
       });
 
+      let payment: ResType;
+
       if (result.error) {
-        await supabase
-          .from("Payment")
-          .update({ status: "FAILED" })
-          .eq("id", paymentId);
-        throw result.error;
-      } else if (result.paymentIntent?.status === "succeeded") {
-        await supabase
-          .from("Payment")
-          .update({ status: "SUCCEEDED" })
-          .eq("id", paymentId);
+        const update = await client.pay[":id"]["$patch"]({
+          param: { id: pi.paymentId },
+          json: { status: PaymentStatus.FAILED },
+        });
 
-        await supabase
-          .from("Quote")
-          .update({ status: "ACCEPTED" })
-          .eq("id", payload.id);
+        if (!update.ok) throw new Error(await res.text());
+        throw new Error("Payment failed. Please try again");
+      } else if (result.paymentIntent.status === "succeeded") {
+        const update = await client.pay[":id"]["$patch"]({
+          param: { id: pi.paymentId },
+          json: { status: PaymentStatus.SUCCEEDED },
+        });
 
-        await supabase
-          .from("Quote")
-          .update({ status: "REJECTED" })
-          .neq("id", payload.id)
-          .eq("caseId", payload.caseId);
-
-        await supabase
-          .from("LegalCase")
-          .update({ status: "ENGAGED" })
-          .eq("id", payload.caseId);
+        if (!update.ok) throw new Error(await res.text());
+        payment = await update.json();
+      } else {
+        throw new Error("Payment was not completed");
       }
 
-      return { paymentId };
+      return payment;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["mycase"],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["mycases"],
+      });
+
+      toast.success(
+        "Payment processed successfully! The lawyer can now access your case details"
+      );
     },
     onError: (err) => toast.error(err.message),
     onSettled: () => dispatch(AppAction.setLoading(false)),
   });
 
   return {
-    createPayment: action.mutateAsync,
-    isCreatingPayment: action.isPending,
+    acceptQuote: action.mutateAsync,
+    isAcceptingQuote: action.isPending,
   };
 };

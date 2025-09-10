@@ -4,6 +4,7 @@ import { cors } from "hono/cors";
 import { authRoute } from "./api/auth-route";
 import { caseRoute } from "./api/case-route";
 import { quoteRoute } from "./api/quote-route";
+import { paymentRoute } from "./api/payment-route";
 
 export const runtime = "edge";
 
@@ -13,7 +14,8 @@ const routes = app
   .use("/*", cors())
   .route("/auth", authRoute)
   .route("/cases", caseRoute)
-  .route("/quotes", quoteRoute);
+  .route("/quotes", quoteRoute)
+  .route("/pay", paymentRoute);
 
 export default app;
 export type AppType = typeof routes;

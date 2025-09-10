@@ -31,6 +31,10 @@ export const useCreateQuote = () => {
         queryKey: ["case"],
       });
 
+      await queryClient.invalidateQueries({
+        queryKey: ["myquotes"],
+      });
+
       router.push("/lawyer/my-quotes");
     },
     onError: (err) => toast.error(err),

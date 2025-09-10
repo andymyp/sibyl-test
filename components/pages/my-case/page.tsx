@@ -13,15 +13,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
   ArrowLeft,
   Download,
   FileText,
@@ -33,11 +24,20 @@ import {
   Loader2,
   ImageIcon,
 } from "lucide-react";
-import { toast } from "sonner";
 import { useGetMyCase } from "@/hooks/case/use-get-my-case";
 import { Quote } from "@/lib/generated/prisma";
 import { downloadFile } from "@/lib/utils";
 import { useUser } from "@/components/providers/user-provider";
+import { useAcceptQuote } from "@/hooks/quote/use-accept-quote";
+import { PaymentCardForm } from "./form";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface Props {
   id: string;
@@ -51,6 +51,8 @@ export function MyCasePage({ id }: Props) {
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   const { isGettingCase, case: case_ } = useGetMyCase(user.id, id);
+
+  const { isAcceptingQuote, acceptQuote } = useAcceptQuote();
 
   if (isGettingCase) {
     return (
@@ -116,23 +118,12 @@ export function MyCasePage({ id }: Props) {
   };
 
   const handleAcceptQuote = async (quote: Quote) => {
-    console.log(quote);
     setIsProcessingPayment(true);
     try {
-      // Simulate payment processing
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await acceptQuote({ param: { id: quote.id } });
 
-      // TODO: call supabase update
-      // await supabase.from("Quote").update({ status: "ACCEPTED" }).eq("id", quote.id)
-      // await supabase.from("LegalCase").update({ status: "ENGAGED", engagedQuoteId: quote.id }).eq("id", case_.id)
-
-      toast.success(
-        "Payment processed successfully! The lawyer can now access your case details."
-      );
       setIsPaymentOpen(false);
       setSelectedQuote(null);
-    } catch {
-      toast.error("Payment failed. Please try again.");
     } finally {
       setIsProcessingPayment(false);
     }
@@ -263,7 +254,7 @@ export function MyCasePage({ id }: Props) {
                             <div className="flex items-center space-x-2">
                               <DollarSign className="h-4 w-4 text-green-600" />
                               <span className="text-lg font-semibold text-gray-900">
-                                {quote.amount.toLocaleString()}
+                                {(quote.amount / 100).toLocaleString()}
                               </span>
                             </div>
                             <div className="flex items-center space-x-2">
@@ -278,7 +269,7 @@ export function MyCasePage({ id }: Props) {
 
                           {case_.status === "OPEN" &&
                             quote.status === "PROPOSED" && (
-                              <Dialog
+                              <AlertDialog
                                 open={
                                   isPaymentOpen && selectedQuote === quote.id
                                 }
@@ -287,52 +278,45 @@ export function MyCasePage({ id }: Props) {
                                   if (!open) setSelectedQuote(null);
                                 }}
                               >
-                                <DialogTrigger asChild>
+                                <AlertDialogTrigger asChild>
                                   <Button
                                     onClick={() => setSelectedQuote(quote.id)}
                                     className="w-full"
                                   >
                                     <CreditCard className="h-4 w-4 mr-2" />
                                     Accept & Pay $
-                                    {quote.amount.toLocaleString()}
+                                    {(quote.amount / 100).toLocaleString()}
                                   </Button>
-                                </DialogTrigger>
-                                <DialogContent>
-                                  <DialogHeader>
-                                    <DialogTitle>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>
                                       Accept Quote & Pay
-                                    </DialogTitle>
-                                    <DialogDescription>
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
                                       You are about to accept the quote from{" "}
                                       {quote.lawyer?.name ?? "Unknown Lawyer"}{" "}
-                                      and pay ${quote.amount.toLocaleString()}.
-                                    </DialogDescription>
-                                  </DialogHeader>
-                                  <DialogFooter>
-                                    <Button
-                                      variant="outline"
-                                      onClick={() => {
-                                        setIsPaymentOpen(false);
-                                        setSelectedQuote(null);
-                                      }}
-                                    >
-                                      Cancel
-                                    </Button>
-                                    <Button
-                                      onClick={() =>
-                                        handleAcceptQuote(
-                                          quote as unknown as Quote
-                                        )
-                                      }
-                                      disabled={isProcessingPayment}
-                                    >
-                                      {isProcessingPayment
-                                        ? "Processing..."
-                                        : "Pay Now"}
-                                    </Button>
-                                  </DialogFooter>
-                                </DialogContent>
-                              </Dialog>
+                                      and pay $
+                                      {(quote.amount / 100).toLocaleString()}.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <PaymentCardForm
+                                    amount={quote.amount}
+                                    isLoading={
+                                      isProcessingPayment || isAcceptingQuote
+                                    }
+                                    onSubmit={() =>
+                                      handleAcceptQuote(
+                                        quote as unknown as Quote
+                                      )
+                                    }
+                                    onCancel={() => {
+                                      setIsPaymentOpen(false);
+                                      setSelectedQuote(null);
+                                    }}
+                                  />
+                                </AlertDialogContent>
+                              </AlertDialog>
                             )}
 
                           {quote.status === "ACCEPTED" && (
@@ -412,7 +396,7 @@ export function MyCasePage({ id }: Props) {
                   <div className="flex justify-between">
                     <span className="text-sm text-green-700">Amount</span>
                     <span className="text-sm font-medium text-green-800">
-                      ${Math.round(acceptedQuote.amount / 100).toLocaleString()}
+                      ${(acceptedQuote.amount / 100).toLocaleString()}
                     </span>
                   </div>
                   <div className="flex justify-between">
