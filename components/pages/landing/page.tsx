@@ -56,7 +56,7 @@ export function LandingPage() {
             </Link>
             <Link href="/signup/lawyer">
               <Button size="lg" variant="outline" className="px-8">
-                I'm a lawyer
+                I&apos;m a lawyer
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>

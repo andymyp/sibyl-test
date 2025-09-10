@@ -43,7 +43,7 @@ export default function CaseQuotePage({ id }: Props) {
         <CardContent className="flex flex-col flex-1 justify-center items-center">
           <Alert className="border-red-200 bg-red-50 w-fit">
             <AlertDescription className="text-destructive">
-              Case not found or you don't have permission to view it.
+              Case not found or you don&apos;t have permission to view it.
             </AlertDescription>
           </Alert>
         </CardContent>

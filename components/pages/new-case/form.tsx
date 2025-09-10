@@ -1,7 +1,7 @@
 "use client";
 
 import { z } from "zod";
-import { FileText, Image, Loader2, Mail, Upload, XIcon } from "lucide-react";
+import { FileText, ImageIcon, Loader2, Upload, XIcon } from "lucide-react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -216,7 +216,7 @@ export function CaseForm({ user }: Props) {
                       {file.type === "application/pdf" ? (
                         <FileText className="h-5 w-5 text-red-500" />
                       ) : (
-                        <Image className="h-5 w-5 text-indigo-500" />
+                        <ImageIcon className="h-5 w-5 text-indigo-500" />
                       )}
                       <div>
                         <p className="text-sm font-medium text-gray-900">

@@ -49,13 +49,14 @@ export function QuoteForm({ user, case_, existingQuote }: Props) {
       expectedDays: existingQuote?.expectedDays || 0,
       note: existingQuote?.note || "",
     });
-  }, [existingQuote]);
+  }, [existingQuote, form]);
 
   const { isCreatingQuote, createQuote } = useCreateQuote();
   const { isUpdatingQuote, updateQuote } = useUpdateQuote();
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     if (existingQuote) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { lawyer, ...quote } = existingQuote;
       await updateQuote({ ...quote, ...data });
     } else {

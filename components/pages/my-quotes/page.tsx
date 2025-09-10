@@ -12,7 +12,6 @@ import { DollarSign, Clock, FileText, ExternalLink } from "lucide-react";
 import { useUser } from "@/components/providers/user-provider";
 import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
 import { useGetMyQuotes } from "@/hooks/quote/use-get-my-quotes";
-import { Quote } from "@/lib/generated/prisma";
 import { PageHeader } from "@/components/ui/page-header";
 import { MyQuotesTable } from "./table";
 import { useGetStatsQuotes } from "@/hooks/quote/use-get-stats-quotes";

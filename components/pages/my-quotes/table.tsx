@@ -5,7 +5,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { DataTable, TableFilters } from "@/components/ui/datatable";
+import { DataTable } from "@/components/ui/datatable";
 import { useRouter } from "@bprogress/next";
 import { ColumnDef } from "@tanstack/react-table";
 import { Edit2, Eye, MoreVertical } from "lucide-react";

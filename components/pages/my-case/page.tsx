@@ -25,16 +25,15 @@ import {
   ArrowLeft,
   Download,
   FileText,
-  Image,
   Calendar,
   DollarSign,
   Clock,
   UserIcon,
   CreditCard,
   Loader2,
+  ImageIcon,
 } from "lucide-react";
 import { toast } from "sonner";
-import { User } from "@supabase/supabase-js";
 import { useGetMyCase } from "@/hooks/case/use-get-my-case";
 import { CaseFile } from "@/lib/generated/prisma";
 import { IQuoteWithLawyer } from "@/lib/types/case-type";
@@ -70,7 +69,7 @@ export function MyCasePage({ id }: Props) {
         <CardContent className="flex flex-col flex-1 justify-center items-center">
           <Alert className="border-red-200 bg-red-50 w-fit">
             <AlertDescription className="text-destructive">
-              Case not found or you don't have permission to view it.
+              Case not found or you don&apos;t have permission to view it.
             </AlertDescription>
           </Alert>
         </CardContent>
@@ -118,6 +117,7 @@ export function MyCasePage({ id }: Props) {
   };
 
   const handleAcceptQuote = async (quote: IQuoteWithLawyer) => {
+    console.log(quote);
     setIsProcessingPayment(true);
     try {
       // Simulate payment processing
@@ -132,7 +132,7 @@ export function MyCasePage({ id }: Props) {
       );
       setIsPaymentOpen(false);
       setSelectedQuote(null);
-    } catch (error) {
+    } catch {
       toast.error("Payment failed. Please try again.");
     } finally {
       setIsProcessingPayment(false);
@@ -196,7 +196,7 @@ export function MyCasePage({ id }: Props) {
                               {file.mimeType === "application/pdf" ? (
                                 <FileText className="h-5 w-5 text-red-500" />
                               ) : (
-                                <Image className="h-5 w-5 text-indigo-500" />
+                                <ImageIcon className="h-5 w-5 text-indigo-500" />
                               )}
                               <div>
                                 <p className="text-sm font-medium text-gray-900">
