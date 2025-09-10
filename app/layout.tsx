@@ -6,6 +6,7 @@ import { NuqsProvider } from "@/components/providers/nuqs-provider";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { LoadingProvider } from "@/components/providers/loading-provider";
 import { ToastProvider } from "@/components/providers/toast-provider";
+import { StripeProvider } from "@/components/providers/stripe-provider";
 
 export const metadata: Metadata = {
   title: "LegalConnect",
@@ -35,7 +36,9 @@ export default function RootLayout({
           <NuqsProvider>
             <QueryProvider>
               <LoadingProvider>
-                <ToastProvider>{children}</ToastProvider>
+                <ToastProvider>
+                  <StripeProvider>{children}</StripeProvider>
+                </ToastProvider>
               </LoadingProvider>
             </QueryProvider>
           </NuqsProvider>

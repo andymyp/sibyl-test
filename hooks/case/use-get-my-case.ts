@@ -1,33 +1,15 @@
-import { createClient } from "@/lib/supabase/client";
-import { IMyCasesParams } from "@/lib/types/case-type";
 import { useQuery } from "@tanstack/react-query";
+import { client } from "@/lib/hono/client";
+import { InferResponseType } from "hono";
+
+type ResType = InferResponseType<(typeof client.cases)[":id"]["$get"]>;
 
 export const useGetMyCase = (userId: string, id: string) => {
-  const supabase = createClient();
-
-  const action = useQuery({
+  const action = useQuery<ResType>({
     queryKey: ["mycase", userId, id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("LegalCase")
-        .select(
-          `
-          *,
-          client:User!clientId(*),
-          files:CaseFile(*),
-          quotes:Quote(
-            *,
-            lawyer:User!lawyerId(*)
-          )
-  `
-        )
-        .eq("clientId", userId)
-        .eq("id", id)
-        .single();
-
-      if (error) throw error;
-
-      return data;
+      const res = await client.cases[":id"]["$get"]({ param: { id } });
+      return res.json();
     },
   });
 

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Role } from "../generated/prisma";
 
 export const SignInSchema = z.object({
   email: z.email("Invalid email address"),
@@ -13,6 +14,7 @@ export const SignUpSchema = z
     confirm_password: z.string().min(1, "Confirm password is required"),
     jurisdiction: z.string().optional(),
     barNumber: z.string().optional(),
+    role: z.enum(Role),
   })
   .check((ctx) => {
     if (ctx.value.password !== ctx.value.confirm_password) {

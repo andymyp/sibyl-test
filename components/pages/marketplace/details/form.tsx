@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { Clock, DollarSign, Loader2 } from "lucide-react";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { SubmitErrorHandler, SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
@@ -17,26 +17,24 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { QuoteSchema } from "@/lib/schemas/quote-schema";
 import { useCreateQuote } from "@/hooks/quote/use-create-quote";
-import { User } from "@supabase/supabase-js";
 import Link from "next/link";
 import { Textarea } from "@/components/ui/textarea";
 import { useUpdateQuote } from "@/hooks/quote/use-update-quote";
-import { IQuoteWithLawyer } from "@/lib/types/case-type";
-import { LegalCase } from "@/lib/generated/prisma";
 import { useEffect } from "react";
+import { Quote } from "@/lib/generated/prisma";
 
 interface Props {
-  user: User;
-  case_: LegalCase;
-  existingQuote?: IQuoteWithLawyer;
+  caseId: string;
+  existingQuote?: Quote;
 }
 
 type FormValues = z.infer<typeof QuoteSchema>;
 
-export function QuoteForm({ user, case_, existingQuote }: Props) {
+export function QuoteForm({ caseId, existingQuote }: Props) {
   const form = useForm<FormValues>({
     resolver: zodResolver(QuoteSchema),
     defaultValues: {
+      caseId: caseId,
       amount: 0,
       expectedDays: 0,
       note: "",
@@ -44,33 +42,38 @@ export function QuoteForm({ user, case_, existingQuote }: Props) {
   });
 
   useEffect(() => {
-    form.reset({
-      amount: existingQuote?.amount || 0,
-      expectedDays: existingQuote?.expectedDays || 0,
-      note: existingQuote?.note || "",
-    });
+    if (existingQuote) {
+      form.reset({
+        caseId: existingQuote.caseId,
+        amount: existingQuote.amount || 0,
+        expectedDays: existingQuote.expectedDays || 0,
+        note: existingQuote.note || "",
+      });
+    }
   }, [existingQuote, form]);
 
   const { isCreatingQuote, createQuote } = useCreateQuote();
-  const { isUpdatingQuote, updateQuote } = useUpdateQuote();
+  const { isUpdatingQuote, updateQuote } = useUpdateQuote(existingQuote?.id);
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     if (existingQuote) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { lawyer, ...quote } = existingQuote;
-      await updateQuote({ ...quote, ...data });
+      await updateQuote({ ...existingQuote, ...data });
     } else {
-      await createQuote({ ...data, caseId: case_.id, lawyerId: user.id });
+      await createQuote(data);
     }
 
     form.reset();
+  };
+
+  const onError: SubmitErrorHandler<FormValues> = async (errors) => {
+    console.log("errors:", errors);
   };
 
   return (
     <Form {...form}>
       <form
         className="flex flex-col w-full gap-4"
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={form.handleSubmit(onSubmit, onError)}
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField

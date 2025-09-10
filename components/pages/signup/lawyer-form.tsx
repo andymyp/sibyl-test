@@ -29,10 +29,11 @@ export function SignUpLawyerForm() {
       email: "",
       password: "",
       confirm_password: "",
+      role: Role.LAWYER,
     },
   });
 
-  const { isLoading, signUp } = useSignUp(Role.LAWYER);
+  const { isLoading, signUp } = useSignUp();
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     await signUp(data);

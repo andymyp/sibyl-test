@@ -68,7 +68,7 @@ export function DashboardPage() {
 
   const getQuoteCount = (caseId: string) => {
     const legalCase = cases.find((c) => c.id === caseId);
-    return legalCase?.Quote?.length ?? 0;
+    return legalCase?.quotes?.length ?? 0;
   };
 
   return (
@@ -220,7 +220,7 @@ export function DashboardPage() {
                   </p>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4 text-sm text-gray-500">
-                      <span>{case_.CaseFile.length} files</span>
+                      <span>{case_.files.length} files</span>
                       <span>{getQuoteCount(case_.id)} quotes</span>
                     </div>
                     <Link href={`/client/cases/${case_.id}`}>

@@ -13,10 +13,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeft, Calendar, FileText, Loader2 } from "lucide-react";
 import { useUser } from "@/components/providers/user-provider";
 import { useGetCase } from "@/hooks/case/use-get-case";
-import { IQuoteWithLawyer } from "@/lib/types/case-type";
-import { Quote } from "@/lib/generated/prisma";
 import { anonymizeText } from "@/lib/utils";
 import { QuoteForm } from "./form";
+import { Quote } from "@/lib/generated/prisma";
 
 interface Props {
   id: string;
@@ -51,8 +50,8 @@ export default function CaseQuotePage({ id }: Props) {
     );
   }
 
-  const existingQuote: IQuoteWithLawyer = case_.quotes.find(
-    (q: Quote) => q.caseId === id && q.lawyerId === user.id
+  const existingQuote = case_.quotes.find(
+    (q) => q.caseId === id && q.lawyerId === user.id
   );
 
   return (
@@ -123,9 +122,8 @@ export default function CaseQuotePage({ id }: Props) {
               </CardHeader>
               <CardContent>
                 <QuoteForm
-                  user={user}
-                  case_={case_}
-                  existingQuote={existingQuote}
+                  caseId={case_.id}
+                  existingQuote={existingQuote as unknown as Quote}
                 />
               </CardContent>
             </Card>

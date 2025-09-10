@@ -3,33 +3,26 @@ import { AppAction } from "@/lib/store/slices/app-slice";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";
-import { createClient } from "@/lib/supabase/client";
-import { v4 as uuidv4 } from "uuid";
-import { ICreateQuote } from "@/lib/types/quote-type";
-import { QuoteStatus } from "@/lib/generated/prisma";
 import { useRouter } from "@bprogress/next";
+import { client } from "@/lib/hono/client";
+import { InferRequestType, InferResponseType } from "hono";
+
+type ReqType = InferRequestType<typeof client.quotes.$post>["json"];
+type ResType = InferResponseType<typeof client.quotes.$post>;
 
 export const useCreateQuote = () => {
-  const supabase = createClient();
   const dispatch = useDispatch<AppDispatch>();
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  const quoteId = uuidv4();
-
-  const action = useMutation<{ quoteId: string }, Error, ICreateQuote>({
-    mutationFn: async (payload) => {
+  const action = useMutation<ResType, string, ReqType>({
+    mutationFn: async (json) => {
       dispatch(AppAction.setLoading(true));
 
-      const { error: quoteError } = await supabase.from("Quote").insert({
-        ...payload,
-        id: quoteId,
-        status: QuoteStatus.PROPOSED,
-      });
+      const res = await client.quotes.$post({ json });
 
-      if (quoteError) throw quoteError;
-
-      return { quoteId };
+      if (!res.ok) throw res.text();
+      return res.json();
     },
     onSuccess: async () => {
       toast.success("Quote submitted successfully");
@@ -40,7 +33,7 @@ export const useCreateQuote = () => {
 
       router.push("/lawyer/my-quotes");
     },
-    onError: (err) => toast.error(err.message),
+    onError: (err) => toast.error(err),
     onSettled: () => dispatch(AppAction.setLoading(false)),
   });
 

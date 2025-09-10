@@ -1,45 +1,22 @@
-import { createClient } from "@/lib/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { client } from "@/lib/hono/client";
+import { InferResponseType } from "hono";
+
+type ResType = InferResponseType<typeof client.quotes.stats.$get>;
 
 export const useGetStatsQuotes = (userId: string) => {
-  const supabase = createClient();
-
-  const action = useQuery({
-    queryKey: ["stats-quotes", userId],
+  const action = useQuery<ResType>({
+    queryKey: ["quotes-stats", userId],
     queryFn: async () => {
-      const statuses = ["PROPOSED", "ACCEPTED", "REJECTED"] as const;
-
-      const results = await Promise.all(
-        statuses.map(async (status) => {
-          const { count, error } = await supabase
-            .from("Quote")
-            .select("*", { count: "exact", head: true })
-            .eq("lawyerId", userId)
-            .eq("status", status);
-
-          if (error) throw error;
-          return { status, count: count ?? 0 };
-        })
-      );
-
-      const { count: total } = await supabase
-        .from("Quote")
-        .select("*", { count: "exact", head: true })
-        .eq("lawyerId", userId);
-
-      return {
-        total: total ?? 0,
-        proposed: results.find((r) => r.status === "PROPOSED")?.count ?? 0,
-        accepted: results.find((r) => r.status === "ACCEPTED")?.count ?? 0,
-        rejected: results.find((r) => r.status === "REJECTED")?.count ?? 0,
-      };
+      const res = await client.quotes.stats.$get();
+      return res.json();
     },
   });
 
   return {
-    total: action.data?.total,
-    proposed: action.data?.proposed,
-    accepted: action.data?.accepted,
-    rejected: action.data?.rejected,
+    total: action.data?.total ?? 0,
+    proposed: action.data?.proposed ?? 0,
+    accepted: action.data?.accepted ?? 0,
+    rejected: action.data?.rejected ?? 0,
   };
 };

@@ -17,7 +17,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { CaseSchema } from "@/lib/schemas/case-schema";
 import { useCreateCase } from "@/hooks/case/use-create-case";
-import { User } from "@supabase/supabase-js";
 import {
   Select,
   SelectContent,
@@ -31,19 +30,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
-interface Props {
-  user: User;
-}
-
 type FormValues = z.infer<typeof CaseSchema>;
 
-export function CaseForm({ user }: Props) {
+export function CaseForm() {
   const form = useForm<FormValues>({
     resolver: zodResolver(CaseSchema),
     defaultValues: { title: "", category: "", description: "", files: [] },
   });
-
-  const files = form.watch("files");
 
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return "0 Bytes";
@@ -53,40 +46,10 @@ export function CaseForm({ user }: Props) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const selectedFiles = Array.from(e.target.files);
-
-      const validTypes = ["application/pdf", "image/png"];
-      const invalidFiles = selectedFiles.filter(
-        (file) => !validTypes.includes(file.type)
-      );
-
-      if (invalidFiles.length > 0) {
-        toast.error("Only PDF and PNG files are allowed");
-        return;
-      }
-
-      if (files.length + selectedFiles.length > 10) {
-        toast.error("Maximum 10 files allowed");
-        return;
-      }
-
-      form.setValue("files", [...files, ...selectedFiles]);
-    }
-  };
-
-  const removeFile = (index: number) => {
-    form.setValue(
-      "files",
-      files.filter((_, i) => i !== index)
-    );
-  };
-
   const { isCreatingCase, createCase } = useCreateCase();
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    await createCase({ ...data, clientId: user.id });
+    await createCase(data);
     form.reset();
   };
 
@@ -171,76 +134,106 @@ export function CaseForm({ user }: Props) {
           )}
         />
 
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label>Documents (Optional)</Label>
-            <p className="text-sm text-gray-500">
-              Upload relevant documents (PDF or PNG files, max 10 files)
-            </p>
-          </div>
+        <FormField
+          control={form.control}
+          name="files"
+          render={({ field }) => (
+            <FormItem>
+              <Label>Documents (Optional)</Label>
+              <p className="text-sm text-gray-500">
+                Upload relevant documents (PDF or PNG files, max 10 files)
+              </p>
 
-          <div className="w-full">
-            <label
-              htmlFor="file-upload"
-              className="flex flex-col items-center justify-center w-full p-4 border-2 border-dashed rounded-xl cursor-pointer border-gray-300 bg-gray-50 hover:border-indigo-400 hover:bg-indigo-50 transition-colors"
-            >
-              <Upload className="w-10 h-10 text-gray-400" />
-              <span className="mt-3 text-sm font-medium text-gray-900">
-                Click to upload files
-              </span>
-              <span className="text-xs text-gray-500">
-                PDF or PNG files up to 10MB each
-              </span>
-            </label>
-            <input
-              id="file-upload"
-              name="file-upload"
-              type="file"
-              multiple
-              accept=".pdf,.png"
-              onChange={handleFileChange}
-              className="hidden"
-            />
-          </div>
+              <div className="w-full">
+                <label
+                  htmlFor="file-upload"
+                  className="flex flex-col items-center justify-center w-full p-4 border-2 border-dashed rounded-xl cursor-pointer border-gray-300 bg-gray-50 hover:border-indigo-400 hover:bg-indigo-50 transition-colors"
+                >
+                  <Upload className="w-10 h-10 text-gray-400" />
+                  <span className="mt-3 text-sm font-medium text-gray-900">
+                    Click to upload files
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    PDF or PNG files up to 10MB each
+                  </span>
+                </label>
+                <input
+                  id="file-upload"
+                  type="file"
+                  multiple
+                  accept=".pdf,.png"
+                  className="hidden"
+                  onChange={(e) => {
+                    const selectedFiles = Array.from(e.target.files ?? []);
 
-          {files.length > 0 && (
-            <div className="space-y-2">
-              <Label>Selected Files ({files.length}/10)</Label>
-              <div className="space-y-2">
-                {files.map((file, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                  >
-                    <div className="flex items-center space-x-3">
-                      {file.type === "application/pdf" ? (
-                        <FileText className="h-5 w-5 text-red-500" />
-                      ) : (
-                        <ImageIcon className="h-5 w-5 text-indigo-500" />
-                      )}
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">
-                          {file.name}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {formatFileSize(file.size)}
-                        </p>
-                      </div>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeFile(index)}
-                    >
-                      <XIcon className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
+                    const validTypes = ["application/pdf", "image/png"];
+                    const invalidFiles = selectedFiles.filter(
+                      (file) => !validTypes.includes(file.type)
+                    );
+
+                    if (invalidFiles.length > 0) {
+                      toast.error("Only PDF and PNG files are allowed");
+                      return;
+                    }
+
+                    const value = field.value ?? [];
+
+                    if (value.length + selectedFiles.length > 10) {
+                      toast.error("Maximum 10 files allowed");
+                      return;
+                    }
+
+                    field.onChange([...value, ...selectedFiles]);
+                  }}
+                />
               </div>
-            </div>
+
+              {field.value && field.value.length > 0 && (
+                <div className="space-y-3 mt-4">
+                  <Label>Selected Files ({field.value.length}/10)</Label>
+                  <div className="space-y-2">
+                    {field.value.map((file: File, index: number) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-3 bg-gray-100 rounded-lg"
+                      >
+                        <div className="flex items-center space-x-3">
+                          {file.type === "application/pdf" ? (
+                            <FileText className="h-5 w-5 text-red-500" />
+                          ) : (
+                            <ImageIcon className="h-5 w-5 text-indigo-500" />
+                          )}
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">
+                              {file.name}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {formatFileSize(file.size)}
+                            </p>
+                          </div>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="hover:!bg-gray-200"
+                          onClick={() =>
+                            field.onChange(
+                              field.value?.filter((_, i) => i !== index)
+                            )
+                          }
+                        >
+                          <XIcon className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <FormMessage />
+            </FormItem>
           )}
-        </div>
+        />
 
         <div className="flex justify-between items-center w-full mt-4">
           <Button

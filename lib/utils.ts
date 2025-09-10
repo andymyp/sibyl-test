@@ -16,7 +16,10 @@ export function anonymizeText(text: string) {
       /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
       "[EMAIL REDACTED]"
     )
-    .replace(/\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/g, "[PHONE REDACTED]");
+    .replace(
+      /\+?\d{1,4}?[-.\s]?\(?\d{1,4}\)?([-.\s]?\d{2,4}){2,6}/g,
+      "[PHONE REDACTED]"
+    );
 }
 
 export async function getSignedUrl(storageKey: string) {

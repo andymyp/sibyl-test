@@ -1,15 +1,15 @@
 import { LegalCase, Quote, User, CaseFile } from "@/lib/generated/prisma";
 
 export interface ICasesParams {
-  search: string | null;
-  category: string | null;
-  created_since: Date | null;
+  search?: string | null;
+  category?: string | null;
+  created_since?: Date | null;
   page: number;
   limit: number;
 }
 
 export interface IMyCasesParams {
-  search: string | null;
+  search?: string | null;
   page: number;
   limit: number;
 }

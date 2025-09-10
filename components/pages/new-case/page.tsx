@@ -10,11 +10,8 @@ import {
 } from "@/components/ui/card";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { useUser } from "@/components/providers/user-provider";
 
 export function NewCasePage() {
-  const user = useUser();
-
   return (
     <div className="flex w-full justify-center">
       <div className="flex flex-col w-full max-w-2xl gap-4">
@@ -35,7 +32,7 @@ export function NewCasePage() {
           </CardHeader>
 
           <CardContent>
-            <CaseForm user={user} />
+            <CaseForm />
           </CardContent>
         </Card>
       </div>

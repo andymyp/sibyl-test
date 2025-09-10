@@ -27,7 +27,7 @@ const getStatusColor = (status: string) => {
 
 const columns: ColumnDef<IQuoteWithCase>[] = [
   {
-    accessorKey: "case_.title",
+    accessorKey: "legalCase.title",
     header: "Case Title",
     cell: (info) => (
       <div className="font-medium">{info.getValue<string>()}</div>
@@ -35,7 +35,7 @@ const columns: ColumnDef<IQuoteWithCase>[] = [
     enableSorting: false,
   },
   {
-    accessorKey: "case_.category",
+    accessorKey: "legalCase.category",
     header: "Category",
     cell: (info) => <div>{info.getValue<string>()}</div>,
     enableSorting: false,
@@ -98,7 +98,7 @@ export function MyQuotesTable({
   const router = useRouter();
 
   const canAccessCaseFiles = (quote: IQuoteWithCase) => {
-    const case_ = quote.case_;
+    const case_ = quote.legalCase;
     return quote.status === "ACCEPTED" && case_?.status === "ENGAGED";
   };
 
@@ -119,7 +119,7 @@ export function MyQuotesTable({
               View Full Case Details
             </DropdownMenuItem>
           )}
-          {row.status === "PROPOSED" && row.case_.status === "OPEN" && (
+          {row.status === "PROPOSED" && row.legalCase.status === "OPEN" && (
             <DropdownMenuItem
               onClick={() => router.push(`/lawyer/marketplace/${row.caseId}`)}
             >

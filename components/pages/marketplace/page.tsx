@@ -26,7 +26,6 @@ import {
 import { useDebounce } from "@/hooks/use-debounce";
 import { useGetCases } from "@/hooks/case/use-get-cases";
 import { Paginator } from "@/components/ui/paginator";
-import { Quote } from "@/lib/generated/prisma";
 import { useUser } from "@/components/providers/user-provider";
 
 export function MarketplacePage() {
@@ -50,14 +49,13 @@ export function MarketplacePage() {
   const { isGettingCases, totalCases, cases } = useGetCases({
     ...filters,
     search: searchDebounce,
-    category: filters.category === "all" ? null : filters.category,
+    category: filters.category === "all" ? undefined : filters.category,
   });
 
   const hasQuoteForCase = (caseId: string) => {
     return cases.some(
       (c) =>
-        c.id === caseId &&
-        c.Quote.some((quote: Quote) => quote.lawyerId === user.id)
+        c.id === caseId && c.quotes.some((quote) => quote.lawyerId === user.id)
     );
   };
 
@@ -182,7 +180,7 @@ export function MarketplacePage() {
                 <div className="flex justify-between items-center">
                   <div className="flex items-center text-muted-foreground text-xs">
                     <FileText className="h-4 w-4 mr-1" />
-                    {case_.CaseFile.length} files
+                    {case_.files.length} files
                   </div>
                   <Link href={`/lawyer/marketplace/${case_.id}`}>
                     <Button variant="outline">View Details & Quote</Button>

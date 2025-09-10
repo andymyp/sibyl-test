@@ -3,29 +3,32 @@ import { AppAction } from "@/lib/store/slices/app-slice";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";
-import { createClient } from "@/lib/supabase/client";
-import { IUpdateQuote } from "@/lib/types/quote-type";
 import { useRouter } from "@bprogress/next";
+import { client } from "@/lib/hono/client";
+import { InferRequestType, InferResponseType } from "hono";
 
-export const useUpdateQuote = () => {
-  const supabase = createClient();
+type ReqType = InferRequestType<
+  (typeof client.quotes)[":id"]["$patch"]
+>["json"];
+
+type ResType = InferResponseType<(typeof client.quotes)[":id"]["$patch"]>;
+
+export const useUpdateQuote = (id?: string) => {
   const dispatch = useDispatch<AppDispatch>();
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  const action = useMutation<{ id: string }, Error, IUpdateQuote>({
-    mutationFn: async ({ id, ...payload }) => {
+  const action = useMutation<ResType, string, ReqType>({
+    mutationFn: async (json) => {
       dispatch(AppAction.setLoading(true));
 
-      const { error } = await supabase
-        .from("Quote")
-        .update({
-          ...payload,
-        })
-        .eq("id", id);
+      const res = await client.quotes[":id"]["$patch"]({
+        param: { id: id ? id : "" },
+        json,
+      });
 
-      if (error) throw error;
-      return { id };
+      if (!res.ok) throw res.text();
+      return res.json();
     },
     onSuccess: async () => {
       toast.success("Quote updated");
@@ -36,7 +39,7 @@ export const useUpdateQuote = () => {
 
       router.push("/lawyer/my-quotes");
     },
-    onError: (err) => toast.error(err.message),
+    onError: (err) => toast.error(err),
     onSettled: () => dispatch(AppAction.setLoading(false)),
   });
 

@@ -35,8 +35,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useGetMyCase } from "@/hooks/case/use-get-my-case";
-import { CaseFile } from "@/lib/generated/prisma";
-import { IQuoteWithLawyer } from "@/lib/types/case-type";
+import { Quote } from "@/lib/generated/prisma";
 import { downloadFile } from "@/lib/utils";
 import { useUser } from "@/components/providers/user-provider";
 
@@ -77,7 +76,7 @@ export function MyCasePage({ id }: Props) {
     );
   }
 
-  const quotes: IQuoteWithLawyer[] = case_.quotes ?? [];
+  const quotes = case_.quotes ?? [];
   const acceptedQuote = quotes.find((q) => q.status === "ACCEPTED");
 
   const getStatusColor = (status: string) => {
@@ -96,12 +95,12 @@ export function MyCasePage({ id }: Props) {
   };
 
   const getQuoteStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "proposed":
+    switch (status) {
+      case "PROPOSED":
         return "bg-yellow-100 text-yellow-800";
-      case "accepted":
+      case "ACCEPTED":
         return "bg-green-100 text-green-800";
-      case "rejected":
+      case "REJECTED":
         return "bg-red-100 text-red-800";
       default:
         return "bg-gray-100 text-gray-800";
@@ -116,7 +115,7 @@ export function MyCasePage({ id }: Props) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
-  const handleAcceptQuote = async (quote: IQuoteWithLawyer) => {
+  const handleAcceptQuote = async (quote: Quote) => {
     console.log(quote);
     setIsProcessingPayment(true);
     try {
@@ -187,7 +186,7 @@ export function MyCasePage({ id }: Props) {
                         Documents ({case_.files.length})
                       </h4>
                       <div className="space-y-2">
-                        {case_.files.map((file: CaseFile) => (
+                        {case_.files.map((file) => (
                           <div
                             key={file.id}
                             className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
@@ -320,7 +319,11 @@ export function MyCasePage({ id }: Props) {
                                       Cancel
                                     </Button>
                                     <Button
-                                      onClick={() => handleAcceptQuote(quote)}
+                                      onClick={() =>
+                                        handleAcceptQuote(
+                                          quote as unknown as Quote
+                                        )
+                                      }
                                       disabled={isProcessingPayment}
                                     >
                                       {isProcessingPayment
