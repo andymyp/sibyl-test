@@ -1,0 +1,111 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  role         Role
+  jurisdiction String?
+  barNumber    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
+
+  cases  LegalCase[] @relation("client_cases")
+  quotes Quote[]     @relation("lawyer_quotes")
+}
+
+model LegalCase {
+  id             String     @id @default(uuid())
+  clientId       String
+  client         User       @relation(fields: [clientId], references: [id], name: "client_cases")
+  title          String
+  category       String
+  description    String
+  status         CaseStatus @default(OPEN)
+  engagedQuoteId String?    @unique
+  files          CaseFile[]
+  quotes         Quote[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model CaseFile {
+  id         String    @id @default(uuid())
+  caseId     String
+  legalCase  LegalCase @relation(fields: [caseId], references: [id])
+  storageKey String
+  filename   String
+  mimeType   String
+  size       Int
+  createdAt  DateTime  @default(now())
+}
+
+model Quote {
+  id           String      @id @default(uuid())
+  caseId       String
+  legalCase    LegalCase   @relation(fields: [caseId], references: [id])
+  lawyerId     String
+  lawyer       User        @relation(fields: [lawyerId], references: [id], name: "lawyer_quotes")
+  amount       Int
+  expectedDays Int
+  note         String?
+  status       QuoteStatus @default(PROPOSED)
+  Payment      Payment[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @default(now()) @updatedAt
+
+  @@unique([caseId, lawyerId], name: "case_lawyer_unique")
+  @@index([caseId])
+  @@index([lawyerId])
+}
+
+model Payment {
+  id             String        @id @default(uuid())
+  quoteId        String
+  quote          Quote         @relation(fields: [quoteId], references: [id])
+  stripeIntentId String
+  amount         Int
+  status         PaymentStatus
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @default(now()) @updatedAt
+}
+
+enum Role {
+  CLIENT
+  LAWYER
+}
+
+enum CaseStatus {
+  OPEN
+  ENGAGED
+  CLOSED
+  CANCELLED
+}
+
+enum QuoteStatus {
+  PROPOSED
+  ACCEPTED
+  REJECTED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+}
