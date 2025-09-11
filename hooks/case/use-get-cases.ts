@@ -1,61 +1,23 @@
-import { createClient } from "@/lib/supabase/client";
 import { ICasesParams } from "@/lib/types/case-type";
 import { useQuery } from "@tanstack/react-query";
+import { client } from "@/lib/hono/client";
+import { InferResponseType } from "hono";
 
-export const useGetCases = (params: ICasesParams) => {
-  const supabase = createClient();
+type ResType = InferResponseType<typeof client.cases.marketplace.$get>;
 
-  const action = useQuery({
+export const useGetCases = (query: ICasesParams) => {
+  const action = useQuery<ResType>({
     queryKey: [
       "cases",
-      params.search,
-      params.category,
-      params.created_since,
-      params.page,
-      params.limit,
+      query.search,
+      query.category,
+      query.created_since,
+      query.page,
+      query.limit,
     ],
     queryFn: async () => {
-      const { search, category, created_since, page, limit } = params;
-
-      let query = supabase
-        .from("LegalCase")
-        .select(
-          `
-            *,
-            Quote (*),
-            CaseFile (*)
-          `,
-          { count: "exact" }
-        )
-        .eq("status", "OPEN")
-        .order("createdAt", { ascending: false });
-
-      if (search) {
-        query = query.or(
-          `title.ilike.%${search}%,description.ilike.%${search}%`
-        );
-      }
-
-      if (category) {
-        query = query.eq("category", category);
-      }
-
-      if (created_since) {
-        query = query.gte("createdAt", new Date(created_since).toISOString());
-      }
-
-      const from = (page - 1) * limit;
-      const to = from + limit - 1;
-      query = query.range(from, to);
-
-      const { data, error, count } = await query;
-
-      if (error) throw error;
-
-      return {
-        cases: data,
-        total: count || 0,
-      };
+      const res = await client.cases.marketplace.$get({ query });
+      return await res.json();
     },
   });
 

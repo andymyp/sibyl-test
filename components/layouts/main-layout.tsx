@@ -5,17 +5,38 @@ import { AppState } from "@/lib/store";
 import { useSelector } from "react-redux";
 import { cn } from "@/lib/utils";
 import { MainHeader } from "../ui/main-header";
-import { User } from "@supabase/supabase-js";
 import { Sidebar } from "../ui/sidebar";
 import { UserProvider } from "../providers/user-provider";
+import { PageLoader } from "../ui/page-loader";
+import { useCheckUser } from "@/hooks/use-check-user";
+import { useRedirect } from "@/hooks/use-redirect";
+import { Role } from "@/lib/generated/prisma";
 
 interface Props {
-  user: User;
+  page: "client" | "lawyer";
   children: React.ReactNode;
 }
 
-export function MainLayout({ user, children }: Props) {
+export function MainLayout({ page, children }: Props) {
   const isLoading = useSelector((s: AppState) => s.app.isLoading);
+
+  const { userLoading, user } = useCheckUser();
+
+  useRedirect(() => {
+    if (!userLoading && !user) return "/login";
+
+    if (page === "client" && user && user.user_metadata.role !== Role.CLIENT) {
+      return "/lawyer/marketplace";
+    }
+
+    if (page === "lawyer" && user && user.user_metadata.role !== Role.LAWYER) {
+      return "/client/dashboard";
+    }
+
+    return null;
+  });
+
+  if (userLoading || !user) return <PageLoader />;
 
   return (
     <UserProvider user={user}>

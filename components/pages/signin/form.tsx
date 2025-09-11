@@ -1,7 +1,6 @@
 "use client";
 
 import { z } from "zod";
-import Link from "next/link";
 import { Loader2, Mail } from "lucide-react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";

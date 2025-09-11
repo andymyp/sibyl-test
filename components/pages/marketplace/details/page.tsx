@@ -13,10 +13,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeft, Calendar, FileText, Loader2 } from "lucide-react";
 import { useUser } from "@/components/providers/user-provider";
 import { useGetCase } from "@/hooks/case/use-get-case";
-import { IQuoteWithLawyer } from "@/lib/types/case-type";
-import { Quote } from "@/lib/generated/prisma";
 import { anonymizeText } from "@/lib/utils";
 import { QuoteForm } from "./form";
+import { Quote } from "@/lib/generated/prisma";
 
 interface Props {
   id: string;
@@ -43,7 +42,7 @@ export default function CaseQuotePage({ id }: Props) {
         <CardContent className="flex flex-col flex-1 justify-center items-center">
           <Alert className="border-red-200 bg-red-50 w-fit">
             <AlertDescription className="text-destructive">
-              Case not found or you don't have permission to view it.
+              Case not found or you don&apos;t have permission to view it.
             </AlertDescription>
           </Alert>
         </CardContent>
@@ -51,8 +50,8 @@ export default function CaseQuotePage({ id }: Props) {
     );
   }
 
-  const existingQuote: IQuoteWithLawyer = case_.quotes.find(
-    (q: Quote) => q.caseId === id && q.lawyerId === user.id
+  const existingQuote = case_.quotes.find(
+    (q) => q.caseId === id && q.lawyerId === user.id
   );
 
   return (
@@ -81,7 +80,7 @@ export default function CaseQuotePage({ id }: Props) {
                       </span>
                       <span className="flex items-center">
                         <FileText className="h-4 w-4 mr-1" />
-                        {case_.files.length} files
+                        {case_._count.files} files
                       </span>
                     </CardDescription>
                   </div>
@@ -123,9 +122,8 @@ export default function CaseQuotePage({ id }: Props) {
               </CardHeader>
               <CardContent>
                 <QuoteForm
-                  user={user}
-                  case_={case_}
-                  existingQuote={existingQuote}
+                  caseId={case_.id}
+                  existingQuote={existingQuote as unknown as Quote}
                 />
               </CardContent>
             </Card>
@@ -143,7 +141,7 @@ export default function CaseQuotePage({ id }: Props) {
                   <div className="flex justify-between">
                     <span className="text-sm text-indigo-700">Amount</span>
                     <span className="text-sm font-medium text-indigo-800">
-                      ${existingQuote.amount.toLocaleString()}
+                      ${(existingQuote.amount / 100).toLocaleString()}
                     </span>
                   </div>
                   <div className="flex justify-between">
@@ -180,7 +178,7 @@ export default function CaseQuotePage({ id }: Props) {
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Files</span>
                   <span className="text-sm font-medium">
-                    {case_.files.length}
+                    {case_._count.files}
                   </span>
                 </div>
                 <div className="flex justify-between">

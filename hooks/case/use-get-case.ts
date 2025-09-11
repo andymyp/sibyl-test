@@ -1,32 +1,20 @@
-import { createClient } from "@/lib/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { client } from "@/lib/hono/client";
+import { InferResponseType } from "hono";
+
+type ResType = InferResponseType<
+  (typeof client.cases.marketplace)[":id"]["$get"]
+>;
 
 export const useGetCase = (id: string) => {
-  const supabase = createClient();
-
-  const action = useQuery({
+  const action = useQuery<ResType>({
     queryKey: ["case", id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("LegalCase")
-        .select(
-          `
-          *,
-          client:User!clientId(*),
-          files:CaseFile(*),
-          quotes:Quote(
-            *,
-            lawyer:User!lawyerId(*)
-          )
-  `
-        )
-        .eq("id", id)
-        .eq("status", "OPEN")
-        .single();
+      const res = await client.cases.marketplace[":id"]["$get"]({
+        param: { id },
+      });
 
-      if (error) throw error;
-
-      return data;
+      return await res.json();
     },
   });
 

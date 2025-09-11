@@ -1,4 +1,4 @@
-import { LegalCase, Quote, QuoteStatus } from "../generated/prisma";
+import { Quote } from "../generated/prisma";
 import { ILegalCaseWithRelations } from "./case-type";
 
 export interface ICreateQuote {
@@ -24,5 +24,5 @@ export interface IQuotesParams {
   limit: number;
 }
 export interface IQuoteWithCase extends Quote {
-  case_: ILegalCaseWithRelations;
+  legalCase: ILegalCaseWithRelations;
 }

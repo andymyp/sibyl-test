@@ -3,31 +3,28 @@ import { AppAction } from "@/lib/store/slices/app-slice";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
-import { createClient } from "@/lib/supabase/client";
-import { ILogin } from "@/lib/types/auth-type";
 import { toast } from "sonner";
-import { User } from "@supabase/supabase-js";
+import { client } from "@/lib/hono/client";
+import { InferRequestType, InferResponseType } from "hono";
+
+type ReqType = InferRequestType<typeof client.auth.signin.$post>["json"];
+type ResType = InferResponseType<typeof client.auth.signin.$post>;
 
 export function useSignIn() {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
-  const supabase = createClient();
 
-  const action = useMutation<User, Error, ILogin>({
-    mutationFn: async (payload) => {
+  const action = useMutation<ResType, Error, ReqType>({
+    mutationFn: async (json) => {
       dispatch(AppAction.setLoading(true));
 
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: payload.email,
-        password: payload.password,
-      });
+      const res = await client.auth.signin.$post({ json });
 
-      if (error) throw error;
-
-      return data.user;
+      if (!res.ok) throw new Error(await res.text());
+      return await res.json();
     },
-    onSuccess: async (user) => {
-      const userRole = user.user_metadata?.role;
+    onSuccess: (user) => {
+      const userRole = user?.user_metadata.role;
 
       if (userRole === "CLIENT") {
         return router.replace("/client/dashboard");

@@ -1,7 +1,6 @@
 "use client";
 
 import { z } from "zod";
-import Link from "next/link";
 import { Globe2, Hash, Loader2, Mail, User } from "lucide-react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,10 +29,11 @@ export function SignUpLawyerForm() {
       email: "",
       password: "",
       confirm_password: "",
+      role: Role.LAWYER,
     },
   });
 
-  const { isLoading, signUp } = useSignUp(Role.LAWYER);
+  const { isLoading, signUp } = useSignUp();
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     await signUp(data);
@@ -55,7 +55,7 @@ export function SignUpLawyerForm() {
                 <Input
                   placeholder="Name"
                   rightIcon={User}
-                  disabled={form.formState.isSubmitting}
+                  disabled={form.formState.isSubmitting || isLoading}
                   {...field}
                 />
               </FormControl>
@@ -72,7 +72,7 @@ export function SignUpLawyerForm() {
                 <Input
                   placeholder="Jurisdiction (optional)"
                   rightIcon={Globe2}
-                  disabled={form.formState.isSubmitting}
+                  disabled={form.formState.isSubmitting || isLoading}
                   {...field}
                 />
               </FormControl>
@@ -89,7 +89,7 @@ export function SignUpLawyerForm() {
                 <Input
                   placeholder="Bar Number (optional)"
                   rightIcon={Hash}
-                  disabled={form.formState.isSubmitting}
+                  disabled={form.formState.isSubmitting || isLoading}
                   {...field}
                 />
               </FormControl>
@@ -106,7 +106,7 @@ export function SignUpLawyerForm() {
                 <Input
                   placeholder="Email"
                   rightIcon={Mail}
-                  disabled={form.formState.isSubmitting}
+                  disabled={form.formState.isSubmitting || isLoading}
                   {...field}
                 />
               </FormControl>
@@ -123,7 +123,7 @@ export function SignUpLawyerForm() {
                 <Input
                   placeholder="Password"
                   type="password"
-                  disabled={form.formState.isSubmitting}
+                  disabled={form.formState.isSubmitting || isLoading}
                   {...field}
                   toggleablePassword
                 />
@@ -141,7 +141,7 @@ export function SignUpLawyerForm() {
                 <Input
                   placeholder="Confirm Password"
                   type="password"
-                  disabled={form.formState.isSubmitting}
+                  disabled={form.formState.isSubmitting || isLoading}
                   {...field}
                   toggleablePassword
                 />
@@ -152,10 +152,10 @@ export function SignUpLawyerForm() {
         />
         <Button
           type="submit"
-          disabled={form.formState.isSubmitting}
+          disabled={form.formState.isSubmitting || isLoading}
           className="w-full mt-4"
         >
-          {form.formState.isSubmitting && (
+          {(form.formState.isSubmitting || isLoading) && (
             <Loader2 className="animate-spin text-white" />
           )}
           Sign Up

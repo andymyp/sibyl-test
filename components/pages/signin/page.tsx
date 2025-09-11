@@ -47,7 +47,7 @@ export function SignInPage() {
 
             <div className="mt-6 text-center space-y-4">
               <div className="text-sm text-gray-600">
-                Don't have an account?
+                Don&apos;t have an account?
               </div>
               <div className="flex space-x-2">
                 <Link href="/signup/client" className="flex-1">

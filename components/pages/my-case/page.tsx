@@ -13,33 +13,31 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
   ArrowLeft,
   Download,
   FileText,
-  Image,
   Calendar,
   DollarSign,
   Clock,
   UserIcon,
   CreditCard,
   Loader2,
+  ImageIcon,
 } from "lucide-react";
-import { toast } from "sonner";
-import { User } from "@supabase/supabase-js";
 import { useGetMyCase } from "@/hooks/case/use-get-my-case";
-import { CaseFile } from "@/lib/generated/prisma";
-import { IQuoteWithLawyer } from "@/lib/types/case-type";
+import { Quote } from "@/lib/generated/prisma";
 import { downloadFile } from "@/lib/utils";
 import { useUser } from "@/components/providers/user-provider";
+import { useAcceptQuote } from "@/hooks/quote/use-accept-quote";
+import { PaymentCardForm } from "./form";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface Props {
   id: string;
@@ -53,6 +51,8 @@ export function MyCasePage({ id }: Props) {
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   const { isGettingCase, case: case_ } = useGetMyCase(user.id, id);
+
+  const { isAcceptingQuote, acceptQuote } = useAcceptQuote();
 
   if (isGettingCase) {
     return (
@@ -70,7 +70,7 @@ export function MyCasePage({ id }: Props) {
         <CardContent className="flex flex-col flex-1 justify-center items-center">
           <Alert className="border-red-200 bg-red-50 w-fit">
             <AlertDescription className="text-destructive">
-              Case not found or you don't have permission to view it.
+              Case not found or you don&apos;t have permission to view it.
             </AlertDescription>
           </Alert>
         </CardContent>
@@ -78,7 +78,7 @@ export function MyCasePage({ id }: Props) {
     );
   }
 
-  const quotes: IQuoteWithLawyer[] = case_.quotes ?? [];
+  const quotes = case_.quotes ?? [];
   const acceptedQuote = quotes.find((q) => q.status === "ACCEPTED");
 
   const getStatusColor = (status: string) => {
@@ -97,12 +97,12 @@ export function MyCasePage({ id }: Props) {
   };
 
   const getQuoteStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "proposed":
+    switch (status) {
+      case "PROPOSED":
         return "bg-yellow-100 text-yellow-800";
-      case "accepted":
+      case "ACCEPTED":
         return "bg-green-100 text-green-800";
-      case "rejected":
+      case "REJECTED":
         return "bg-red-100 text-red-800";
       default:
         return "bg-gray-100 text-gray-800";
@@ -117,23 +117,13 @@ export function MyCasePage({ id }: Props) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
-  const handleAcceptQuote = async (quote: IQuoteWithLawyer) => {
+  const handleAcceptQuote = async (quote: Quote) => {
     setIsProcessingPayment(true);
     try {
-      // Simulate payment processing
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await acceptQuote({ param: { id: quote.id } });
 
-      // TODO: call supabase update
-      // await supabase.from("Quote").update({ status: "ACCEPTED" }).eq("id", quote.id)
-      // await supabase.from("LegalCase").update({ status: "ENGAGED", engagedQuoteId: quote.id }).eq("id", case_.id)
-
-      toast.success(
-        "Payment processed successfully! The lawyer can now access your case details."
-      );
       setIsPaymentOpen(false);
       setSelectedQuote(null);
-    } catch (error) {
-      toast.error("Payment failed. Please try again.");
     } finally {
       setIsProcessingPayment(false);
     }
@@ -187,7 +177,7 @@ export function MyCasePage({ id }: Props) {
                         Documents ({case_.files.length})
                       </h4>
                       <div className="space-y-2">
-                        {case_.files.map((file: CaseFile) => (
+                        {case_.files.map((file) => (
                           <div
                             key={file.id}
                             className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
@@ -196,7 +186,7 @@ export function MyCasePage({ id }: Props) {
                               {file.mimeType === "application/pdf" ? (
                                 <FileText className="h-5 w-5 text-red-500" />
                               ) : (
-                                <Image className="h-5 w-5 text-indigo-500" />
+                                <ImageIcon className="h-5 w-5 text-indigo-500" />
                               )}
                               <div>
                                 <p className="text-sm font-medium text-gray-900">
@@ -264,7 +254,7 @@ export function MyCasePage({ id }: Props) {
                             <div className="flex items-center space-x-2">
                               <DollarSign className="h-4 w-4 text-green-600" />
                               <span className="text-lg font-semibold text-gray-900">
-                                {quote.amount.toLocaleString()}
+                                {(quote.amount / 100).toLocaleString()}
                               </span>
                             </div>
                             <div className="flex items-center space-x-2">
@@ -279,7 +269,7 @@ export function MyCasePage({ id }: Props) {
 
                           {case_.status === "OPEN" &&
                             quote.status === "PROPOSED" && (
-                              <Dialog
+                              <AlertDialog
                                 open={
                                   isPaymentOpen && selectedQuote === quote.id
                                 }
@@ -288,48 +278,45 @@ export function MyCasePage({ id }: Props) {
                                   if (!open) setSelectedQuote(null);
                                 }}
                               >
-                                <DialogTrigger asChild>
+                                <AlertDialogTrigger asChild>
                                   <Button
                                     onClick={() => setSelectedQuote(quote.id)}
                                     className="w-full"
                                   >
                                     <CreditCard className="h-4 w-4 mr-2" />
                                     Accept & Pay $
-                                    {quote.amount.toLocaleString()}
+                                    {(quote.amount / 100).toLocaleString()}
                                   </Button>
-                                </DialogTrigger>
-                                <DialogContent>
-                                  <DialogHeader>
-                                    <DialogTitle>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>
                                       Accept Quote & Pay
-                                    </DialogTitle>
-                                    <DialogDescription>
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
                                       You are about to accept the quote from{" "}
                                       {quote.lawyer?.name ?? "Unknown Lawyer"}{" "}
-                                      and pay ${quote.amount.toLocaleString()}.
-                                    </DialogDescription>
-                                  </DialogHeader>
-                                  <DialogFooter>
-                                    <Button
-                                      variant="outline"
-                                      onClick={() => {
-                                        setIsPaymentOpen(false);
-                                        setSelectedQuote(null);
-                                      }}
-                                    >
-                                      Cancel
-                                    </Button>
-                                    <Button
-                                      onClick={() => handleAcceptQuote(quote)}
-                                      disabled={isProcessingPayment}
-                                    >
-                                      {isProcessingPayment
-                                        ? "Processing..."
-                                        : "Pay Now"}
-                                    </Button>
-                                  </DialogFooter>
-                                </DialogContent>
-                              </Dialog>
+                                      and pay $
+                                      {(quote.amount / 100).toLocaleString()}.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <PaymentCardForm
+                                    amount={quote.amount}
+                                    isLoading={
+                                      isProcessingPayment || isAcceptingQuote
+                                    }
+                                    onSubmit={() =>
+                                      handleAcceptQuote(
+                                        quote as unknown as Quote
+                                      )
+                                    }
+                                    onCancel={() => {
+                                      setIsPaymentOpen(false);
+                                      setSelectedQuote(null);
+                                    }}
+                                  />
+                                </AlertDialogContent>
+                              </AlertDialog>
                             )}
 
                           {quote.status === "ACCEPTED" && (
@@ -409,7 +396,7 @@ export function MyCasePage({ id }: Props) {
                   <div className="flex justify-between">
                     <span className="text-sm text-green-700">Amount</span>
                     <span className="text-sm font-medium text-green-800">
-                      ${Math.round(acceptedQuote.amount / 100).toLocaleString()}
+                      ${(acceptedQuote.amount / 100).toLocaleString()}
                     </span>
                   </div>
                   <div className="flex justify-between">
