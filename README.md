@@ -19,6 +19,15 @@ A **two-sided platform**:
 
 All sensitive operations are handled **server-side**.
 
+## ⚡ Features
+
+- RBAC enforced server-side
+- Secure file upload/download with **short-lived signed URLs**
+- One active quote per lawyer per case
+- Stripe integration in **test mode**
+- Server-driven pagination & filters
+- Atomic, idempotent quote acceptance
+
 ## 🛠 Tech Stack
 
 | Layer     | Technology                                                                                       |
@@ -91,8 +100,6 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 | Client | client1@mail.com | 123123   |
 | Lawyer | lawyer1@mail.com | 123123   |
 
----
-
 ## 🗄 ERD (Visual)
 
 ```mermaid
@@ -114,15 +121,6 @@ erDiagram
 - **Quote** → `Payment` (0-to-many)
 - `LegalCase.engagedQuoteId` points to **single accepted Quote**
 - Unique constraint ensures **one quote per lawyer per case**
-
-## ⚡ Features
-
-- RBAC enforced server-side
-- Secure file upload/download with **short-lived signed URLs**
-- One active quote per lawyer per case
-- Stripe integration in **test mode**
-- Server-driven pagination & filters
-- Atomic, idempotent quote acceptance
 
 ## 📝 Credits
 
