@@ -112,6 +112,68 @@ erDiagram
     LegalCase ||--o| Quote : engagedQuote
 ```
 
+<details>
+<summary>🗄 ERD (Table and Field List)</summary>
+
+```text
+User
+├─ id (PK)
+├─ name
+├─ email (unique)
+├─ role (CLIENT | LAWYER)
+├─ jurisdiction?
+├─ barNumber?
+└─ createdAt / updatedAt
+     │
+     │ 1..* (client_cases)
+     ▼
+LegalCase
+├─ id (PK)
+├─ clientId (FK → User.id)
+├─ title
+├─ category
+├─ description
+├─ status (OPEN | ENGAGED | CLOSED | CANCELLED)
+├─ engagedQuoteId? (FK → Quote.id, unique)
+├─ createdAt / updatedAt
+     │
+     ├─ 1..* (files)
+     ▼
+  CaseFile
+   ├─ id (PK)
+   ├─ caseId (FK → LegalCase.id)
+   ├─ storageKey
+   ├─ filename
+   ├─ mimeType
+   ├─ size
+   └─ createdAt
+
+     │
+     └─ 1..* (quotes)
+     ▼
+  Quote
+   ├─ id (PK)
+   ├─ caseId (FK → LegalCase.id)
+   ├─ lawyerId (FK → User.id)
+   ├─ amount
+   ├─ expectedDays
+   ├─ note?
+   ├─ status (PROPOSED | ACCEPTED | REJECTED)
+   ├─ createdAt / updatedAt
+        │
+        └─ 0..* (Payment)
+        ▼
+     Payment
+      ├─ id (PK)
+      ├─ quoteId (FK → Quote.id)
+      ├─ stripeIntentId
+      ├─ amount
+      ├─ status (PENDING | SUCCEEDED | FAILED)
+      └─ createdAt / updatedAt
+```
+
+</details>
+
 **Notes:**
 
 - **User (CLIENT)** → `LegalCase` (1-to-many)
