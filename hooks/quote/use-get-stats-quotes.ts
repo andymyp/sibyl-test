@@ -9,7 +9,7 @@ export const useGetStatsQuotes = (userId: string) => {
     queryKey: ["quotes-stats", userId],
     queryFn: async () => {
       const res = await client.quotes.stats.$get();
-      return res.json();
+      return await res.json();
     },
   });
 

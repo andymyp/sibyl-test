@@ -10,7 +10,7 @@ export const useGetMyCases = (userId: string, query: IMyCasesParams) => {
     queryKey: ["mycases", userId, query.search, query.page, query.limit],
     queryFn: async () => {
       const res = await client.cases.$get({ query });
-      return res.json();
+      return await res.json();
     },
   });
 

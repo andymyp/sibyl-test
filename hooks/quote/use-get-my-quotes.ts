@@ -10,7 +10,7 @@ export const useGetMyQuotes = (userId: string, query: IQuotesParams) => {
     queryKey: ["myquotes", userId, query.status, query.page, query.limit],
     queryFn: async () => {
       const res = await client.quotes.$get({ query });
-      return res.json();
+      return await res.json();
     },
   });
 

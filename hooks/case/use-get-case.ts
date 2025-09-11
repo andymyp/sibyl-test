@@ -13,7 +13,8 @@ export const useGetCase = (id: string) => {
       const res = await client.cases.marketplace[":id"]["$get"]({
         param: { id },
       });
-      return res.json();
+
+      return await res.json();
     },
   });
 

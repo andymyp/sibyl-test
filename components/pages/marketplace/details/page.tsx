@@ -80,7 +80,7 @@ export default function CaseQuotePage({ id }: Props) {
                       </span>
                       <span className="flex items-center">
                         <FileText className="h-4 w-4 mr-1" />
-                        {case_.files.length} files
+                        {case_._count.files} files
                       </span>
                     </CardDescription>
                   </div>
@@ -178,7 +178,7 @@ export default function CaseQuotePage({ id }: Props) {
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Files</span>
                   <span className="text-sm font-medium">
-                    {case_.files.length}
+                    {case_._count.files}
                   </span>
                 </div>
                 <div className="flex justify-between">

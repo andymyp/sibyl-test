@@ -9,7 +9,7 @@ export const useGetStatsCases = (userId: string) => {
     queryKey: ["my-cases-stats", userId],
     queryFn: async () => {
       const res = await client.cases["my-stats"]["$get"]();
-      return res.json();
+      return await res.json();
     },
   });
 

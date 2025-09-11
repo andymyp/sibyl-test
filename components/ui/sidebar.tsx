@@ -58,7 +58,7 @@ export function Sidebar({ user, setMenuOpen }: Props) {
   const menuList = isClient ? clientMenu : LawyerMenu;
 
   return (
-    <aside className="sticky md:top-[65px] h-screen md:h-[calc(100vh-65px)] w-full sm:max-w-sm md:w-16 flex flex-col items-center justify-between border-r bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm">
+    <aside className="sticky md:top-[65px] h-screen md:h-[calc(100vh-65px)] w-full sm:max-w-sm md:w-16 flex flex-col items-center justify-between border-r bg-background/80 backdrop-blur-sm">
       <ScrollArea className="flex-1 w-full min-h-0">
         <div className="flex flex-col flex-1">
           <div className="flex md:hidden h-16 px-3 md:p-0 items-center justify-start md:justify-center border-b">

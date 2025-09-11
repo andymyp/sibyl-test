@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { authMiddleware } from "../middleware";
 import { QuoteStatus, Role } from "@/lib/generated/prisma";
 import { QuoteSchema } from "@/lib/schemas/quote-schema";
+import { HTTPException } from "hono/http-exception";
 
 export const quoteRoute = new Hono()
   .post(
@@ -13,90 +14,116 @@ export const quoteRoute = new Hono()
     authMiddleware(Role.LAWYER),
     zValidator("json", QuoteSchema),
     async (c) => {
-      const userId = c.get("userId");
-      const req = c.req.valid("json");
+      try {
+        const userId = c.get("userId");
+        const req = c.req.valid("json");
 
-      const quote = await prisma.quote.create({
-        data: {
-          ...req,
-          lawyerId: userId,
-        },
-      });
+        const quote = await prisma.quote.create({
+          data: {
+            ...req,
+            lawyerId: userId,
+          },
+        });
 
-      return c.json(quote, StatusCodes.CREATED);
+        return c.json(quote, StatusCodes.CREATED);
+      } catch (error: any) {
+        throw new HTTPException(error?.status || 500, {
+          message: error?.message || "Internal Server Error",
+        });
+      }
     }
   )
   .get("/stats", authMiddleware(Role.LAWYER), async (c) => {
-    const userId = c.get("userId");
+    try {
+      const userId = c.get("userId");
 
-    const [total, proposed, accepted, rejected] = await Promise.all([
-      prisma.quote.count({ where: { lawyerId: userId } }),
-      prisma.quote.count({
-        where: { lawyerId: userId, status: QuoteStatus.PROPOSED },
-      }),
-      prisma.quote.count({
-        where: { lawyerId: userId, status: QuoteStatus.ACCEPTED },
-      }),
-      prisma.quote.count({
-        where: { lawyerId: userId, status: QuoteStatus.REJECTED },
-      }),
-    ]);
+      const [total, proposed, accepted, rejected] = await Promise.all([
+        prisma.quote.count({ where: { lawyerId: userId } }),
+        prisma.quote.count({
+          where: { lawyerId: userId, status: QuoteStatus.PROPOSED },
+        }),
+        prisma.quote.count({
+          where: { lawyerId: userId, status: QuoteStatus.ACCEPTED },
+        }),
+        prisma.quote.count({
+          where: { lawyerId: userId, status: QuoteStatus.REJECTED },
+        }),
+      ]);
 
-    return c.json({ total, proposed, accepted, rejected }, StatusCodes.OK);
+      return c.json({ total, proposed, accepted, rejected }, StatusCodes.OK);
+    } catch (error: any) {
+      throw new HTTPException(error?.status || 500, {
+        message: error?.message || "Internal Server Error",
+      });
+    }
   })
   .get("/", authMiddleware(Role.LAWYER), async (c) => {
-    const userId = c.get("userId");
+    try {
+      const userId = c.get("userId");
 
-    const { status, page, limit } = c.req.query();
+      const { status, page, limit } = c.req.query();
 
-    const skip = (Number(page) - 1) * Number(limit);
+      const where: any = {
+        lawyerId: userId,
+      };
 
-    const where: any = {
-      lawyerId: userId,
-    };
+      if (status && status !== "" && status !== "null") {
+        where.status = status;
+      }
 
-    if (status && status !== "" && status !== "null") {
-      where.status = status;
-    }
+      let paginate: { skip: number; take: number } | undefined = undefined;
+      if (page && limit) {
+        const skip = (Number(page) - 1) * Number(limit);
+        paginate = {
+          skip,
+          take: Number(limit),
+        };
+      }
 
-    const [total, quotes] = await Promise.all([
-      prisma.quote.count({
-        where,
-      }),
-      prisma.quote.findMany({
-        where,
-        include: {
-          legalCase: {
-            include: {
-              files: true,
-            },
+      const [total, quotes] = await Promise.all([
+        prisma.quote.count({
+          where,
+        }),
+        prisma.quote.findMany({
+          where,
+          include: {
+            legalCase: true,
           },
-        },
-        orderBy: { createdAt: "desc" },
-        skip,
-        take: Number(limit),
-      }),
-    ]);
+          orderBy: { createdAt: "desc" },
+          ...paginate,
+        }),
+      ]);
 
-    return c.json({ total, quotes }, StatusCodes.OK);
+      return c.json({ total, quotes }, StatusCodes.OK);
+    } catch (error: any) {
+      throw new HTTPException(error?.status || 500, {
+        message: error?.message || "Internal Server Error",
+      });
+    }
   })
   .patch(
     "/:id",
     authMiddleware(Role.LAWYER),
     zValidator("json", QuoteSchema),
     async (c) => {
-      const id = c.req.param("id");
-      const userId = c.get("userId");
-      const req = c.req.valid("json");
+      try {
+        const id = c.req.param("id");
+        const userId = c.get("userId");
+        const req = c.req.valid("json");
 
-      const quote = await prisma.quote.update({
-        where: {
-          id,
-          lawyerId: userId,
-        },
-        data: req,
-      });
+        const quote = await prisma.quote.update({
+          where: {
+            id,
+            lawyerId: userId,
+          },
+          data: req,
+        });
 
-      return c.json(quote, StatusCodes.OK);
+        return c.json(quote, StatusCodes.OK);
+      } catch (error: any) {
+        throw new HTTPException(error?.status || 500, {
+          message: error?.message || "Internal Server Error",
+        });
+      }
     }
   );

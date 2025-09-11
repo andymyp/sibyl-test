@@ -17,7 +17,7 @@ export const useGetCases = (query: ICasesParams) => {
     ],
     queryFn: async () => {
       const res = await client.cases.marketplace.$get({ query });
-      return res.json();
+      return await res.json();
     },
   });
 

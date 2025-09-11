@@ -12,11 +12,12 @@ import {
 import { format } from "date-fns";
 
 interface Props {
+  placeholder?: string;
   value: Date | null;
   onChange: (value: Date | null) => void;
 }
 
-export function DatePicker({ value, onChange }: Props) {
+export function DatePicker({ placeholder, value, onChange }: Props) {
   const [open, setOpen] = useState(false);
 
   const handleSelect = (date?: Date) => {
@@ -37,6 +38,8 @@ export function DatePicker({ value, onChange }: Props) {
               <CalendarIcon className="mr-2 h-4 w-4" />
               {value ? (
                 format(new Date(value), "PPP")
+              ) : placeholder ? (
+                <span>{placeholder}</span>
               ) : (
                 <span>Pick a date</span>
               )}

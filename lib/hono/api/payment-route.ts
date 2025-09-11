@@ -20,52 +20,58 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export const paymentRoute = new Hono()
   .post("/:id", authMiddleware(Role.CLIENT), async (c) => {
-    const userId = c.get("userId");
-    const id = c.req.param("id");
+    try {
+      const userId = c.get("userId");
+      const id = c.req.param("id");
 
-    const quote = await prisma.quote.findUnique({
-      where: { id },
-    });
+      const quote = await prisma.quote.findUnique({
+        where: { id },
+      });
 
-    if (!quote) {
-      throw new HTTPException(StatusCodes.NOT_FOUND, {
-        message: "Quote not found",
+      if (!quote) {
+        throw new HTTPException(StatusCodes.NOT_FOUND, {
+          message: "Quote not found",
+        });
+      }
+
+      const pi = await stripe.paymentIntents.create({
+        amount: quote.amount,
+        currency: "usd",
+        metadata: {
+          quoteId: quote.id,
+          caseId: quote.caseId,
+          clientId: userId,
+        },
+      });
+
+      const payment = await prisma.payment.create({
+        data: {
+          quoteId: quote.id,
+          stripeIntentId: pi.id,
+          amount: quote.amount,
+          status: PaymentStatus.PENDING,
+        },
+      });
+
+      return c.json(
+        { clientSecret: pi.client_secret, paymentId: payment.id },
+        StatusCodes.CREATED
+      );
+    } catch (error: any) {
+      throw new HTTPException(error?.status || 500, {
+        message: error?.message || "Internal Server Error",
       });
     }
-
-    const pi = await stripe.paymentIntents.create({
-      amount: quote.amount,
-      currency: "usd",
-      metadata: {
-        quoteId: quote.id,
-        caseId: quote.caseId,
-        clientId: userId,
-      },
-    });
-
-    const payment = await prisma.payment.create({
-      data: {
-        quoteId: quote.id,
-        stripeIntentId: pi.id,
-        amount: quote.amount,
-        status: PaymentStatus.PENDING,
-      },
-    });
-
-    return c.json(
-      { clientSecret: pi.client_secret, paymentId: payment.id },
-      StatusCodes.CREATED
-    );
   })
   .patch(
     "/:id",
     authMiddleware(Role.CLIENT),
     zValidator("json", UpdatePaySchema),
     async (c) => {
-      const id = c.req.param("id");
-      const { status } = c.req.valid("json");
-
       try {
+        const id = c.req.param("id");
+        const { status } = c.req.valid("json");
+
         const payment = await prisma.payment.update({
           where: { id },
           data: { status },
@@ -100,8 +106,8 @@ export const paymentRoute = new Hono()
 
         return c.json(payment, StatusCodes.OK);
       } catch (error: any) {
-        throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR, {
-          message: error.message,
+        throw new HTTPException(error?.status || 500, {
+          message: error?.message || "Internal Server Error",
         });
       }
     }

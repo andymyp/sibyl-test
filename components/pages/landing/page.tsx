@@ -1,3 +1,7 @@
+"use client";
+
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -6,11 +10,50 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ArrowRight, FileText, Shield, Users } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { PageLoader } from "@/components/ui/page-loader";
+import { useCheckUser } from "@/hooks/use-check-user";
+import { Role } from "@/lib/generated/prisma";
+import { AppDispatch, persistor } from "@/lib/store";
+import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "@bprogress/next";
+import {
+  ArrowRight,
+  FileText,
+  LayoutDashboard,
+  LogOut,
+  Shield,
+  Users,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useDispatch } from "react-redux";
 
 export function LandingPage() {
+  const router = useRouter();
+  const supabase = createClient();
+  const dispatch = useDispatch<AppDispatch>();
+
+  const { userLoading, user } = useCheckUser();
+
+  if (userLoading) return <PageLoader />;
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+
+    dispatch({ type: "RESET" });
+    await persistor.purge();
+
+    return router.replace("/login");
+  };
+
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-indigo-50 via-white to-slate-50">
       <nav className="sticky top-0 z-50 border-b border-indigo-100 bg-white/80 backdrop-blur-sm">
@@ -28,10 +71,79 @@ export function LandingPage() {
                 LegalConnect
               </span>
             </div>
-            <div className="flex items-center space-x-4">
-              <Link href="/login">
-                <Button>Sign In</Button>
-              </Link>
+            <div
+              key={user ? "loggedin" : "loggedout"}
+              className="flex items-center space-x-4"
+            >
+              {user ? (
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary">{user.user_metadata.role}</Badge>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className="relative size-9 rounded-full"
+                      >
+                        <Avatar className="size-9">
+                          <AvatarFallback className="bg-primary text-lg text-white">
+                            {user.user_metadata.name.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="end"
+                      className="w-56 border border-border"
+                    >
+                      <DropdownMenuLabel className="font-normal p-3">
+                        <div className="flex flex-col space-y-2">
+                          <p className="text-sm font-medium leading-none">
+                            {user.user_metadata.name}
+                          </p>
+                          <p className="text-xs leading-none text-muted-foreground">
+                            {user.email}
+                          </p>
+                        </div>
+                      </DropdownMenuLabel>
+                      {user.user_metadata.role === Role.CLIENT ? (
+                        <>
+                          <DropdownMenuSeparator className="bg-border/40" />
+                          <DropdownMenuItem
+                            className="gap-3 p-3 cursor-pointer"
+                            onClick={() => router.push("/client/dashboard")}
+                          >
+                            <LayoutDashboard className="h-4 w-4" />
+                            <span>Dashboard</span>
+                          </DropdownMenuItem>
+                        </>
+                      ) : (
+                        <>
+                          <DropdownMenuSeparator className="bg-border/40" />
+                          <DropdownMenuItem
+                            className="gap-3 p-3 cursor-pointer"
+                            onClick={() => router.push("/lawyer/marketplace")}
+                          >
+                            <LayoutDashboard className="h-4 w-4" />
+                            <span>Marketplace</span>
+                          </DropdownMenuItem>
+                        </>
+                      )}
+                      <DropdownMenuSeparator className="bg-border/40" />
+                      <DropdownMenuItem
+                        className="gap-3 p-3 cursor-pointer"
+                        onClick={handleLogout}
+                      >
+                        <LogOut className="h-4 w-4" />
+                        <span>Logout</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              ) : (
+                <Link href="/login">
+                  <Button>Sign In</Button>
+                </Link>
+              )}
             </div>
           </div>
         </div>

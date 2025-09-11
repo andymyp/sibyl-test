@@ -9,7 +9,7 @@ export const useGetLawyerCase = (userId: string, id: string) => {
     queryKey: ["lawyercase", userId, id],
     queryFn: async () => {
       const res = await client.cases.lawyer[":id"]["$get"]({ param: { id } });
-      return res.json();
+      return await res.json();
     },
   });
 

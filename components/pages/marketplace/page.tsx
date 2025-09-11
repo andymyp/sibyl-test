@@ -110,6 +110,7 @@ export function MarketplacePage() {
             </Select>
 
             <DatePicker
+              placeholder="Created Since"
               value={filters.created_since}
               onChange={(value) => {
                 setFilters({
@@ -180,7 +181,7 @@ export function MarketplacePage() {
                 <div className="flex justify-between items-center">
                   <div className="flex items-center text-muted-foreground text-xs">
                     <FileText className="h-4 w-4 mr-1" />
-                    {case_.files.length} files
+                    {case_._count.files} files
                   </div>
                   <Link href={`/lawyer/marketplace/${case_.id}`}>
                     <Button variant="outline">View Details & Quote</Button>

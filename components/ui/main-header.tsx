@@ -25,7 +25,7 @@ export function MainHeader({ user }: Props) {
   const [menuOpen, setMenuOpen] = React.useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-background border-b backdrop-blur-xl">
+    <header className="sticky top-0 z-50 w-full bg-background/80 border-b backdrop-blur-sm">
       <div className="flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-3 md:gap-4">
           <Sheet open={menuOpen} onOpenChange={setMenuOpen}>

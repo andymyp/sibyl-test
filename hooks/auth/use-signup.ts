@@ -14,14 +14,14 @@ export function useSignUp() {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
 
-  const action = useMutation<ResType, string, ReqType>({
+  const action = useMutation<ResType, Error, ReqType>({
     mutationFn: async (json) => {
       dispatch(AppAction.setLoading(true));
 
       const res = await client.auth.signup.$post({ json });
 
-      if (!res.ok) throw res.text();
-      return res.json();
+      if (!res.ok) throw new Error(await res.text());
+      return await res.json();
     },
     onSuccess: async (user) => {
       toast.success("Success. Sign in...");
@@ -34,7 +34,7 @@ export function useSignUp() {
 
       return router.replace("/lawyer/marketplace");
     },
-    onError: (err) => toast.error(err),
+    onError: (err) => toast.error(err.message),
     onSettled: () => dispatch(AppAction.setLoading(false)),
   });
 

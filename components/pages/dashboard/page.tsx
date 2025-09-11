@@ -66,11 +66,6 @@ export function DashboardPage() {
     }
   };
 
-  const getQuoteCount = (caseId: string) => {
-    const legalCase = cases.find((c) => c.id === caseId);
-    return legalCase?.quotes?.length ?? 0;
-  };
-
   return (
     <div className="flex flex-col flex-1 w-full gap-4">
       <PageHeader
@@ -220,8 +215,8 @@ export function DashboardPage() {
                   </p>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4 text-sm text-gray-500">
-                      <span>{case_.files.length} files</span>
-                      <span>{getQuoteCount(case_.id)} quotes</span>
+                      <span>{case_._count.files} files</span>
+                      <span>{case_._count.quotes} quotes</span>
                     </div>
                     <Link href={`/client/cases/${case_.id}`}>
                       <Button variant="outline" size="sm">
